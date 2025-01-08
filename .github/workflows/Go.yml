@@ -199,6 +199,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
     outputs:
+      empty: ${{ steps.set-matrix.outputs.empty }}
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
@@ -215,6 +216,10 @@ jobs:
         shell: bash
         run: |
           MATRIX=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')
+          EMPTY=$(echo $MATRIX | jq '. | length == 0')
+
+          echo "empty=$EMPTY"
+          echo "empty=$EMPTY" >> $GITHUB_OUTPUT
 
           echo "matrix=$MATRIX"
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
@@ -222,7 +227,7 @@ jobs:
   fuzz:
     name: Fuzz
     runs-on: ubuntu-latest
-    if: inputs.fuzz == true
+    if: ${{ inputs.fuzz == true && needs.fuzz-matrix.outputs.empty != 'true' }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
