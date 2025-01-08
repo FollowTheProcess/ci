@@ -58,10 +58,6 @@ on:
 permissions:
   contents: read
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   test:
     name: Test
@@ -71,6 +67,7 @@ jobs:
       run:
         # Top level defaults can't take inputs
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
     strategy:
       matrix:
         os:
@@ -93,15 +90,11 @@ jobs:
 
       - name: Run Tests
         if: inputs.test-summary == true
-        run: go test -race -json -cover -covermode atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
-
-      - name: Run Tests
-        if: inputs.test-summary == true
-        run: go test -race -json -cover -covermode atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
+        run: go test -race -json -cover -covermode=atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
 
       - name: Run Tests
         if: inputs.test-summary != true
-        run: go test -race -cover -covermode atomic ${{ inputs.test-flags }} ./...
+        run: go test -race -cover -covermode=atomic ${{ inputs.test-flags }} ./...
 
   cov:
     name: CodeCov
@@ -111,6 +104,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     steps:
       - name: Checkout Code
@@ -122,7 +116,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Tests
-        run: go test -race -cover -covermode atomic -coverprofile ./coverage.out ./...
+        run: go test -race -cover -covermode=atomic -coverprofile=./coverage.out ./...
 
       - name: Coverage
         uses: codecov/codecov-action@v5
@@ -136,6 +130,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     steps:
       - name: Checkout Code
@@ -158,6 +153,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     steps:
       - name: Checkout Code
@@ -173,6 +169,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     steps:
       - name: Checkout Code
@@ -190,13 +187,14 @@ jobs:
         run: govulncheck ./...
 
   fuzz-matrix:
-    name: Make Fuzz Matrix
+    name: Check for Fuzz Tests
     runs-on: ubuntu-latest
     if: inputs.fuzz == true
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     outputs:
       empty: ${{ steps.set-matrix.outputs.empty }}
@@ -225,6 +223,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+        shell: bash
 
     needs:
       - fuzz-matrix
