@@ -213,16 +213,9 @@ jobs:
 
       - name: Set Fuzz Matrix
         id: set-matrix
-        shell: bash
         run: |
-          MATRIX=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')
-          EMPTY=$(echo $MATRIX | jq '. | length == 0')
-
-          echo "empty=$EMPTY"
-          echo "empty=$EMPTY" >> $GITHUB_OUTPUT
-
-          echo "matrix=$MATRIX"
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "empty=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))' | jq '. | length == 0')" >> $GITHUB_OUTPUT
+          echo "matrix=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
   fuzz:
     name: Fuzz
