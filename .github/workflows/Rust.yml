@@ -1,0 +1,196 @@
+name: Rust CI
+
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        description: >
+          The rust toolchain to install e.g "stable", "nightly" etc. any rustup toolchain expression is supported, see https://rust-lang.github.io/rustup/concepts/toolchains.html
+        type: string
+        required: false
+        default: stable
+
+      nextest:
+        description: >
+          Use `cargo nextest` as the test runner, instead of `cargo test`. If true, doctests will be run as a separate step with `cargo test` as nextest does not yet support them
+        type: boolean
+        required: false
+        default: false
+
+      nextest-profile:
+        description: Name of the nextest profile to use for `cargo nextest`. Only has any effect if using nextest as the test runner
+        type: string
+        required: false
+        default: default
+
+      rustflags:
+        description: Value of the `RUSTFLAGS` env var
+        type: string
+        required: false
+        default: --deny warnings
+
+      test-flags:
+        description: Command line flags to pass to `cargo test` (or `cargo nextest run` if using nextest). `--locked` is used regardless.
+        type: string
+        required: false
+        default: --all-targets --all-features
+
+      timeout-minutes:
+        description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+        type: number
+        required: false
+        default: 15
+
+      working-directory:
+        description: The working directory to be in for the entire workflow
+        type: string
+        required: false
+        default: "."
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Cargo Check
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      RUSTFLAGS: ${{ inputs.rustflags }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        run: |
+          rustup update --no-self-update ${{ inputs.toolchain }}
+          rustup default ${{ inputs.toolchain }}
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ inputs.toolchain }}
+
+      - name: Cargo Check
+        run: cargo check --locked --all-targets --all-features
+
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      RUSTFLAGS: ${{ inputs.rustflags }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        run: |
+          rustup update --no-self-update ${{ inputs.toolchain }}
+          rustup default ${{ inputs.toolchain }}
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ inputs.toolchain }}
+
+      - name: Test
+        if: inputs.nextest != true
+        run: cargo test --locked ${{ inputs.test-flags }}
+
+      - name: Test
+        if: inputs.nextest == true
+        run: cargo nextest run --locked ${{ inputs.test-flags }} --profile ${{ inputs.nextest-profile }}
+
+  doctest:
+    name: Doc Tests
+    runs-on: ubuntu-latest
+    if: inputs.nextest == true
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      RUSTFLAGS: ${{ inputs.rustflags }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        run: |
+          rustup update --no-self-update ${{ inputs.toolchain }}
+          rustup default ${{ inputs.toolchain }}
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ inputs.toolchain }}
+
+      - name: Test
+        run: cargo test --locked --doc ${{ inputs.test-flags }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      RUSTFLAGS: ${{ inputs.rustflags }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        run: |
+          rustup update --no-self-update ${{ inputs.toolchain }}
+          rustup default ${{ inputs.toolchain }}
+          rustup component add --toolchain ${{ inputs.toolchain }} rustfmt clippy
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ inputs.toolchain }}
+
+      - name: Check Formatting
+        run: cargo fmt --all --check
+
+      - name: Cargo Clippy
+        run: cargo clippy --locked --all-targets --all-features
+
+  typos:
+    name: Typos
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Typos
+        uses: crate-ci/typos@v1.29.4

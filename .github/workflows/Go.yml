@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       test-summary:
-        description: Use https://github.com/mfridman/tparse to summarise test output to GITHUB_STEP_SUMMARY
+        description: Use https://github.com/mfridman/tparse to summarise test output to `GITHUB_STEP_SUMMARY`
         type: boolean
         required: false
         default: true
