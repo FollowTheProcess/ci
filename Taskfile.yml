@@ -27,4 +27,4 @@ tasks:
       - sh: command -v action-docs
         msg: Requires the action-docs CLI, see https://github.com/npalm/action-docs
     cmds:
-      - action-docs --update-readme --toc-level 3 --source .github/workflows/Go.yml
+      - for file in .github/workflows/*.yml; do action-docs --update-readme --toc-level 3 --no-banner --source "$file"; done
