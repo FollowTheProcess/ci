@@ -1,0 +1,30 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  default:
+    desc: List all available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  check:
+    desc: Check the actions
+    preconditions:
+      - sh: command -v typos
+        msg: Requires the typos-cli, run brew install typos-cli
+
+      - sh: command -v actionlint
+        msg: Requires actionlint, run brew install actionlint
+    cmds:
+      - typos
+      - actionlint
+
+  docs:
+    desc: Use action-docs to update the README
+    preconditions:
+      - sh: command -v action-docs
+        msg: Requires the action-docs CLI, see https://github.com/npalm/action-docs
+    cmds:
+      - action-docs --update-readme --toc-level 3 --source .github/workflows/Go.yml

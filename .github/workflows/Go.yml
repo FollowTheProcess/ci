@@ -1,0 +1,248 @@
+name: Go CI
+
+on:
+  workflow_call:
+    inputs:
+      test-summary:
+        description: Use https://github.com/mfridman/tparse to summarise test output to GITHUB_STEP_SUMMARY
+        type: boolean
+        required: false
+        default: true
+
+      test-flags:
+        description: >
+          Additional flags to pass to `go test`. `-race`, `-cover` and `-covermode` are all already set. If `test-summary` is true,
+          then the `-json` flag will be automatically set as well. But here you may pass `-v` for example or any other test flag.
+        type: string
+        required: false
+        default: ""
+
+      fuzz:
+        description: >
+          Automatically generate a matrix of fuzz tests and run them in parallel for a configurable `fuzz-time`. If there are no
+          fuzz tests in the project, this is a no op so is a safe option to leave on.
+        type: boolean
+        required: false
+        default: true
+
+      fuzz-time:
+        description: Time (in Go `time.Duration` format) to run each fuzz test for
+        type: string
+        required: false
+        default: 1m
+
+      codecov:
+        description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
+        type: boolean
+        required: false
+        default: true
+
+      golangci-lint-version:
+        description: The version of golangci-lint to use
+        type: string
+        required: false
+        default: latest
+
+      timeout-minutes:
+        description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+        type: number
+        required: false
+        default: 15
+
+      working-directory:
+        description: The working directory to be in for the entire workflow
+        type: string
+        required: false
+        default: "."
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        # Top level defaults can't take inputs
+        working-directory: ${{ inputs.working-directory }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install tparse
+        if: inputs.test-summary == true
+        run: go install github.com/mfridman/tparse@latest
+
+      - name: Run Tests
+        if: inputs.test-summary == true
+        run: go test -race -json -cover -covermode atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Tests
+        if: inputs.test-summary == true
+        run: go test -race -json -cover -covermode atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Tests
+        if: inputs.test-summary != true
+        run: go test -race -cover -covermode atomic ${{ inputs.test-flags }} ./...
+
+  cov:
+    name: CodeCov
+    runs-on: ubuntu-latest
+    if: inputs.codecov == true
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run Tests
+        run: go test -race -cover -covermode atomic -coverprofile ./coverage.out ./...
+
+      - name: Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.out
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run Linting
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ inputs.golangci-lint-version }}
+
+  typos:
+    name: Typos
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Typos
+        uses: crate-ci/typos@v1.29.4
+
+  vulncheck:
+    name: Vulncheck
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+        
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        run: govulncheck ./...
+
+  fuzz-matrix:
+    name: Make Fuzz Matrix
+    runs-on: ubuntu-latest
+    if: inputs.fuzz == true
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Set Fuzz Matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          MATRIX=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')
+
+          echo "matrix=$MATRIX"
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  fuzz:
+    name: Fuzz
+    runs-on: ubuntu-latest
+    if: inputs.fuzz == true
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    needs:
+      - fuzz-matrix
+
+    strategy:
+      matrix:
+        fuzz-target: ${{ fromJSON(needs.fuzz-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run Fuzz Tests
+        run: go test -fuzz "^${{ matrix.fuzz-target }}$" -fuzztime ${{ inputs.fuzz-time }}
