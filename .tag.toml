@@ -2,4 +2,4 @@ version = "0.1.0"
 
 [[file]]
 path = "README.md"
-search = 'version="{{.Current}}"'
+search = 'version="v{{.Current}}"'
