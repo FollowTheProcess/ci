@@ -3,7 +3,7 @@
 
 # CI
 
-Consistent, centralised and configurable CI for various languages and ecosystems 🛠️
+Consistent, high quality, and configurable CI for various languages and ecosystems 🛠️
 
 - [CI](#ci)
   - [Go](#go)
