@@ -65,7 +65,6 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        # Top level defaults can't take inputs
         working-directory: ${{ inputs.working-directory }}
         shell: bash
     strategy:

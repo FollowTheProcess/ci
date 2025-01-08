@@ -1,0 +1,186 @@
+name: Python CI
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: The version of python to use as the project default, overrides `python-version-file`. Defaults to reading from `python-version-file`.
+        type: string
+        required: false
+        default: ""
+
+      python-version-file:
+        description: >
+          File to use to detect default python version, can be a PEP621 compliant pyproject.toml, or a `.python-version` file. If `python-version` is specified, this is ignored.
+        type: string
+        required: false
+        default: pyproject.toml
+
+      matrix-python-versions:
+        description: List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc.
+        type: string
+        required: false
+        default: '["3.11", "3.12", "3.13"]'
+
+      uv-version:
+        description: The version of uv to install
+        type: string
+        required: false
+        default: latest
+
+      ruff-version:
+        description: The version of ruff to use for formatting and linting
+        type: string
+        required: false
+        default: latest
+
+      mypy:
+        description: Use the mypy type checker for the type check step, it is expected to be a dev dependency and have config inside pyproject.toml
+        type: boolean
+        required: false
+        default: true
+
+      pyright:
+        description: Use the pyright type checker for the type check step, can be combined with mypy, it is expected to be a dev dependency and have config inside pyproject.toml
+        type: boolean
+        required: false
+        default: false
+
+      pytest-flags:
+        description: Command line flags to pass to pytest e.g. `--cov`, `--cov-report` etc.
+        type: string
+        required: false
+        default: ""
+
+      timeout-minutes:
+        description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+        type: number
+        required: false
+        default: 15
+
+      working-directory:
+        description: The working directory to be in for the entire workflow
+        type: string
+        required: false
+        default: "."
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        python-version: ${{ fromJSON(inputs.matrix-python-versions) }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ inputs.uv-version }}
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run Tests
+        run: uv run pytest --color yes ${{ inputs.pytest-flags }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Ruff Format
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: ${{ inputs.ruff-version }}
+          args: format --check
+
+      - name: Ruff Linting
+        run: ruff check
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: inputs.python-version == ''
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.python-version-file }}
+
+      - name: Set up Python
+        if: inputs.python-version != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ inputs.uv-version }}
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Type Check (MyPy)
+        if: inputs.mypy == true
+        run: uv run mypy --pretty --color-output --config-file pyproject.toml
+
+      - name: Type Check (Pyright)
+        if: inputs.pyright == true
+        run: uv run pyright
+
+  typos:
+    name: Typos
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Typos
+        uses: crate-ci/typos@v1.29.4
