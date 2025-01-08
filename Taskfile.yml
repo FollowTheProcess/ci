@@ -19,7 +19,7 @@ tasks:
         msg: Requires actionlint, run brew install actionlint
     cmds:
       - typos
-      - actionlint
+      - actionlint -ignore SC2086 # Globbing and quoting
 
   docs:
     desc: Use action-docs to update the README
