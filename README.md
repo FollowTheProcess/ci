@@ -202,6 +202,7 @@ A simple but effective CI pipeline for python packages and projects
 - Tests run on all 3 major OS's (ubuntu, macos, windows) with [pytest]
 - Configurable matrix of python versions to multiply by the OS matrix for complete coverage
 - Dependency caching
+- Optionally upload coverage reports to [CodeCov.io] (with tokenless upload)
 - Linting and format checks with [ruff]
 - Type checking with [MyPy] and/or [Pyright] (they can be combined!)
 - Check for typos with [typos-cli]
@@ -219,6 +220,7 @@ A simple but effective CI pipeline for python packages and projects
 | `python-version`         | <p>The version of python to use as the project default, overrides <code>python-version-file</code>. Defaults to reading from <code>python-version-file</code>.</p>                                   | `string`  | `false`  | `""`                       |
 | `python-version-file`    | <p>File to use to detect default python version, can be a PEP621 compliant pyproject.toml, or a <code>.python-version</code> file. If <code>python-version</code> is specified, this is ignored.</p> | `string`  | `false`  | `pyproject.toml`           |
 | `matrix-python-versions` | <p>List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. <code>'["3.12", "3.13"]'</code> etc.</p>                                                          | `string`  | `false`  | `["3.11", "3.12", "3.13"]` |
+| `codecov`                | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                       | `boolean` | `false`  | `true`                     |
 | `uv-version`             | <p>The version of uv to install</p>                                                                                                                                                                  | `string`  | `false`  | `latest`                   |
 | `ruff-version`           | <p>The version of ruff to use for formatting and linting</p>                                                                                                                                         | `string`  | `false`  | `latest`                   |
 | `mypy`                   | <p>Use the mypy type checker for the type check step, it is expected to be a dev dependency and have config inside pyproject.toml</p>                                                                | `boolean` | `false`  | `true`                     |
@@ -254,6 +256,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: ["3.11", "3.12", "3.13"]
+
+      codecov:
+      # Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
+      #
+      # Type: boolean
+      # Required: false
+      # Default: true
 
       uv-version:
       # The version of uv to install
