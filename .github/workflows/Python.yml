@@ -20,7 +20,7 @@ on:
         description: List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc.
         type: string
         required: false
-        default: '["3.11", "3.12", "3.13"]'
+        default: '["3.10", "3.11", "3.12", "3.13"]'
 
       codecov:
         description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
