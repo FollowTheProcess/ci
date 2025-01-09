@@ -125,7 +125,7 @@ jobs:
           args: format --check
 
       - name: Ruff Linting
-        run: ruff check
+        run: ruff check --output-format github
 
   type-check:
     name: Type Check
