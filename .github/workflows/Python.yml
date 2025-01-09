@@ -20,7 +20,13 @@ on:
         description: List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc.
         type: string
         required: false
-        default: '["3.11", "3.12", "3.13"]'
+        default: '["3.10", "3.11", "3.12", "3.13"]'
+
+      codecov:
+        description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
+        type: boolean
+        required: false
+        default: true
 
       uv-version:
         description: The version of uv to install
@@ -126,6 +132,49 @@ jobs:
 
       - name: Ruff Linting
         run: ruff check --output-format github
+
+  cov:
+    name: CodeCov
+    runs-on: ubuntu-latest
+    if: inputs.codecov == true
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: inputs.python-version == ''
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.python-version-file }}
+
+      - name: Set up Python
+        if: inputs.python-version != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ inputs.uv-version }}
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Generate Coverage Report
+        run: uv run pytest --cov --cov-report xml --color yes --doctest-modules
+
+      - name: Upload Coverage to CodeCov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
 
   type-check:
     name: Type Check
