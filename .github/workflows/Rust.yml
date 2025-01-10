@@ -47,8 +47,16 @@ on:
         required: false
         default: "."
 
+      env:
+        description: JSON string of an object containing environment variables to set for the whole workflow
+        type: string
+        required: false
+        default: "{}"
+  
 permissions:
   contents: read
+
+env: ${{ fromJSON(inputs.env) }}
 
 jobs:
   check:
