@@ -18,6 +18,7 @@ Consistent, high quality, and configurable CI for various languages and ecosyste
   - [Zig](#zig)
     - [Inputs](#inputs-3)
     - [Usage](#usage-3)
+  - [Setting Environment Variables](#setting-environment-variables)
 
 ## Go
 
@@ -48,6 +49,7 @@ A great drop in CI pipeline for Go projects!
 | `golangci-lint-version` | <p>The version of golangci-lint to use</p>                                                                                                                                                                                                                                                                                            | `string`  | `false`  | `latest` |
 | `timeout-minutes`       | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                                                                                                                                                 | `number`  | `false`  | `15`     |
 | `working-directory`     | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                                                                                                                                         | `string`  | `false`  | `.`      |
+| `env`                   | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                                                                                                                                        | `string`  | `false`  | `{}`     |
 
 ### Usage
 
@@ -111,6 +113,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: .
+
+      env:
+      # JSON string of an object containing environment variables to set for the whole workflow
+      #
+      # Type: string
+      # Required: false
+      # Default: {}
 ```
 <!-- action-docs-all source=".github/workflows/Go.yml" project="FollowTheProcess/ci/.github/workflows/Go.yml" version="v1" -->
 
@@ -139,6 +148,7 @@ Rust CI can get complex, but this is a great simple CI flow for most crates
 | `test-flags`        | <p>Command line flags to pass to <code>cargo test</code> (or <code>cargo nextest run</code> if using nextest). <code>--locked</code> is used regardless.</p>                                                     | `string`  | `false`  | `--all-targets --all-features` |
 | `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                            | `number`  | `false`  | `15`                           |
 | `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                    | `string`  | `false`  | `.`                            |
+| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                   | `string`  | `false`  | `{}`                           |
 
 ### Usage
 
@@ -195,6 +205,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: .
+
+      env:
+      # JSON string of an object containing environment variables to set for the whole workflow
+      #
+      # Type: string
+      # Required: false
+      # Default: {}
 ```
 <!-- action-docs-all source=".github/workflows/Rust.yml" project="FollowTheProcess/ci/.github/workflows/Rust.yml" version="v1" -->
 
@@ -231,6 +248,7 @@ A simple but effective CI pipeline for python packages and projects
 | `pytest-flags`           | <p>Command line flags to pass to pytest e.g. <code>--cov</code>, <code>--cov-report</code> etc.</p>                                                                                                  | `string`  | `false`  | `""`                               |
 | `timeout-minutes`        | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                | `number`  | `false`  | `15`                               |
 | `working-directory`      | <p>The working directory to be in for the entire workflow</p>                                                                                                                                        | `string`  | `false`  | `.`                                |
+| `env`                    | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                       | `string`  | `false`  | `{}`                               |
 
 ### Usage
 
@@ -315,6 +333,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: .
+
+      env:
+      # JSON string of an object containing environment variables to set for the whole workflow
+      #
+      # Type: string
+      # Required: false
+      # Default: {}
 ```
 <!-- action-docs-all source=".github/workflows/Python.yml" project="FollowTheProcess/ci/.github/workflows/Python.yml" version="v1" -->
 
@@ -341,6 +366,7 @@ Zig doesn't have much in the way of linting etc. at the moment, but this is a si
 | `build-flags`       | <p>User flags to pass to <code>zig build</code> e.g. "-Dmy-flag=value"</p>                                                                                                                   | `string` | `false`  | `""`     |
 | `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                        | `number` | `false`  | `15`     |
 | `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                | `string` | `false`  | `.`      |
+| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                               | `string` | `false`  | `{}`     |
 
 ### Usage
 
@@ -376,8 +402,30 @@ jobs:
       # Type: string
       # Required: false
       # Default: .
+
+      env:
+      # JSON string of an object containing environment variables to set for the whole workflow
+      #
+      # Type: string
+      # Required: false
+      # Default: {}
 ```
 <!-- action-docs-all source=".github/workflows/Zig.yml" project="FollowTheProcess/ci/.github/workflows/Zig.yml" version="v1" -->
+
+## Setting Environment Variables
+
+GitHub unfortunately doesn't let you pass environment variables directly to reusable workflows, so I've implemented a workaround in each of the workflows. You pass a JSON string containing a map of env var name to intended value, and this is parsed and set for you inside each workflow. Like so...
+
+```yaml
+jobs:
+  ci:
+    name: CI
+    permissions:
+      contents: read
+    uses: FollowTheProcess/ci/.github/workflows/Go.yml@v1
+    with:
+      env: '{"NO_COLOR": "true"}' # Here we set the $NO_COLOR env var
+```
 
 [tparse]: https://github.com/mfridman/tparse
 [CodeCov.io]: https://about.codecov.io/
