@@ -114,7 +114,7 @@ jobs:
           enable-cache: true
 
       - name: Install Dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --color always
 
       - name: Run Tests
         run: uv run pytest --color yes ${{ inputs.pytest-flags }}
@@ -123,6 +123,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      FORCE_COLOR: true # Make ruff output colour even in CI
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -135,10 +137,9 @@ jobs:
       - name: Ruff Format
         uses: astral-sh/ruff-action@v3
         with:
-          version: ${{ inputs.ruff-version }}
           args: format --check
 
-      - name: Ruff Linting
+      - name: Ruff Lint
         run: ruff check --output-format github
 
   cov:
@@ -174,7 +175,7 @@ jobs:
           enable-cache: true
 
       - name: Install Dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --color always
 
       - name: Generate Coverage Report
         run: uv run pytest --cov --cov-report xml --color yes --doctest-modules
@@ -216,7 +217,7 @@ jobs:
           enable-cache: true
 
       - name: Install Dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --color always
 
       - name: Type Check (MyPy)
         if: inputs.mypy == true
