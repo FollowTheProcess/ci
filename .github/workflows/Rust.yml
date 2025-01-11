@@ -85,7 +85,7 @@ jobs:
           key: ${{ inputs.toolchain }}
 
       - name: Cargo Check
-        run: cargo check --locked --all-targets --all-features
+        run: cargo check --locked --all-targets --all-features --color always
 
   test:
     name: Test
@@ -120,11 +120,11 @@ jobs:
 
       - name: Test
         if: inputs.nextest != true
-        run: cargo test --locked ${{ inputs.test-flags }}
+        run: cargo test --locked ${{ inputs.test-flags }} --color always
 
       - name: Test
         if: inputs.nextest == true
-        run: cargo nextest run --locked ${{ inputs.test-flags }} --profile ${{ inputs.nextest-profile }}
+        run: cargo nextest run --locked ${{ inputs.test-flags }} --profile ${{ inputs.nextest-profile }} --color always
 
   doctest:
     name: Doc Tests
@@ -153,7 +153,7 @@ jobs:
           key: ${{ inputs.toolchain }}
 
       - name: Test
-        run: cargo test --locked --doc ${{ inputs.test-flags }}
+        run: cargo test --locked --doc ${{ inputs.test-flags }} --color always
 
   lint:
     name: Lint
@@ -185,7 +185,7 @@ jobs:
         run: cargo fmt --all --check
 
       - name: Cargo Clippy
-        run: cargo clippy --locked --all-targets --all-features
+        run: cargo clippy --locked --all-targets --all-features --color always
 
   typos:
     name: Typos
