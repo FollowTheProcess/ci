@@ -100,7 +100,9 @@ jobs:
 
       - name: Run Tests
         if: inputs.test-summary == true
-        run: go test -race -json -cover -covermode=atomic ${{ inputs.test-flags }} ./... | tparse -format markdown >> $GITHUB_STEP_SUMMARY
+        run: |
+          go test -race -json -cover -covermode=atomic ${{ inputs.test-flags }} ./... | tparse -trimpath -all -format markdown -follow-output ./raw.txt >> $GITHUB_STEP_SUMMARY
+          cat ./raw.txt
 
       - name: Run Tests
         if: inputs.test-summary != true
