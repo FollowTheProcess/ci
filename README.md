@@ -39,17 +39,18 @@ A great drop in CI pipeline for Go projects!
 <!-- action-docs-all source=".github/workflows/Go.yml" project="FollowTheProcess/ci/.github/workflows/Go.yml" version="v1" -->
 ### Inputs
 
-| name                    | description                                                                                                                                                                                                                                                                                                                           | type      | required | default  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | -------- |
-| `test-summary`          | <p>Use https://github.com/mfridman/tparse to summarise test output to <code>GITHUB_STEP_SUMMARY</code></p>                                                                                                                                                                                                                            | `boolean` | `false`  | `true`   |
-| `test-flags`            | <p>Additional flags to pass to <code>go test</code>. <code>-race</code>, <code>-cover</code> and <code>-covermode</code> are all already set. If <code>test-summary</code> is true, then the <code>-json</code> flag will be automatically set as well. But here you may pass <code>-v</code> for example or any other test flag.</p> | `string`  | `false`  | `""`     |
-| `fuzz`                  | <p>Automatically generate a matrix of fuzz tests and run them in parallel for a configurable <code>fuzz-time</code>. If there are no fuzz tests in the project, this is a no op so is a safe option to leave on.</p>                                                                                                                  | `boolean` | `false`  | `true`   |
-| `fuzz-time`             | <p>Time (in Go <code>time.Duration</code> format) to run each fuzz test for</p>                                                                                                                                                                                                                                                       | `string`  | `false`  | `1m`     |
-| `codecov`               | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                                                                                                                                                        | `boolean` | `false`  | `true`   |
-| `golangci-lint-version` | <p>The version of golangci-lint to use</p>                                                                                                                                                                                                                                                                                            | `string`  | `false`  | `latest` |
-| `timeout-minutes`       | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                                                                                                                                                 | `number`  | `false`  | `15`     |
-| `working-directory`     | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                                                                                                                                         | `string`  | `false`  | `.`      |
-| `env`                   | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                                                                                                                                        | `string`  | `false`  | `{}`     |
+| name                    | description                                                                                                                                                                                                                                                                                                                           | type      | required | default                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------- |
+| `test-summary`          | <p>Use https://github.com/mfridman/tparse to summarise test output to <code>GITHUB_STEP_SUMMARY</code></p>                                                                                                                                                                                                                            | `boolean` | `false`  | `true`                                                |
+| `test-flags`            | <p>Additional flags to pass to <code>go test</code>. <code>-race</code>, <code>-cover</code> and <code>-covermode</code> are all already set. If <code>test-summary</code> is true, then the <code>-json</code> flag will be automatically set as well. But here you may pass <code>-v</code> for example or any other test flag.</p> | `string`  | `false`  | `""`                                                  |
+| `matrix-os`             | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p>                                                                                                                                                                                         | `string`  | `false`  | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
+| `fuzz`                  | <p>Automatically generate a matrix of fuzz tests and run them in parallel for a configurable <code>fuzz-time</code>. If there are no fuzz tests in the project, this is a no op so is a safe option to leave on.</p>                                                                                                                  | `boolean` | `false`  | `true`                                                |
+| `fuzz-time`             | <p>Time (in Go <code>time.Duration</code> format) to run each fuzz test for</p>                                                                                                                                                                                                                                                       | `string`  | `false`  | `1m`                                                  |
+| `codecov`               | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                                                                                                                                                        | `boolean` | `false`  | `true`                                                |
+| `golangci-lint-version` | <p>The version of golangci-lint to use</p>                                                                                                                                                                                                                                                                                            | `string`  | `false`  | `latest`                                              |
+| `timeout-minutes`       | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                                                                                                                                                 | `number`  | `false`  | `15`                                                  |
+| `working-directory`     | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                                                                                                                                         | `string`  | `false`  | `.`                                                   |
+| `env`                   | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                                                                                                                                        | `string`  | `false`  | `{}`                                                  |
 
 ### Usage
 
@@ -71,6 +72,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: ""
+
+      matrix-os:
+      # List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
+      #
+      # Type: string
+      # Required: false
+      # Default: ["ubuntu-latest", "macos-latest", "windows-latest"]
 
       fuzz:
       # Automatically generate a matrix of fuzz tests and run them in parallel for a configurable `fuzz-time`. If there are no fuzz tests in the project, this is a no op so is a safe option to leave on.
@@ -139,16 +147,17 @@ Rust CI can get complex, but this is a great simple CI flow for most crates
 <!-- action-docs-all source=".github/workflows/Rust.yml" project="FollowTheProcess/ci/.github/workflows/Rust.yml" version="v1" -->
 ### Inputs
 
-| name                | description                                                                                                                                                                                                      | type      | required | default                        |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------ |
-| `toolchain`         | <p>The rust toolchain to install e.g "stable", "nightly" etc. any rustup toolchain expression is supported, see https://rust-lang.github.io/rustup/concepts/toolchains.html</p>                                  | `string`  | `false`  | `stable`                       |
-| `nextest`           | <p>Use <code>cargo nextest</code> as the test runner, instead of <code>cargo test</code>. If true, doctests will be run as a separate step with <code>cargo test</code> as nextest does not yet support them</p> | `boolean` | `false`  | `false`                        |
-| `nextest-profile`   | <p>Name of the nextest profile to use for <code>cargo nextest</code>. Only has any effect if using nextest as the test runner</p>                                                                                | `string`  | `false`  | `default`                      |
-| `rustflags`         | <p>Value of the <code>RUSTFLAGS</code> env var</p>                                                                                                                                                               | `string`  | `false`  | `--deny warnings`              |
-| `test-flags`        | <p>Command line flags to pass to <code>cargo test</code> (or <code>cargo nextest run</code> if using nextest). <code>--locked</code> is used regardless.</p>                                                     | `string`  | `false`  | `--all-targets --all-features` |
-| `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                            | `number`  | `false`  | `15`                           |
-| `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                    | `string`  | `false`  | `.`                            |
-| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                   | `string`  | `false`  | `{}`                           |
+| name                | description                                                                                                                                                                                                      | type      | required | default                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------- |
+| `toolchain`         | <p>The rust toolchain to install e.g "stable", "nightly" etc. any rustup toolchain expression is supported, see https://rust-lang.github.io/rustup/concepts/toolchains.html</p>                                  | `string`  | `false`  | `stable`                                              |
+| `matrix-os`         | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p>                                                                    | `string`  | `false`  | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
+| `nextest`           | <p>Use <code>cargo nextest</code> as the test runner, instead of <code>cargo test</code>. If true, doctests will be run as a separate step with <code>cargo test</code> as nextest does not yet support them</p> | `boolean` | `false`  | `false`                                               |
+| `nextest-profile`   | <p>Name of the nextest profile to use for <code>cargo nextest</code>. Only has any effect if using nextest as the test runner</p>                                                                                | `string`  | `false`  | `default`                                             |
+| `rustflags`         | <p>Value of the <code>RUSTFLAGS</code> env var</p>                                                                                                                                                               | `string`  | `false`  | `--deny warnings`                                     |
+| `test-flags`        | <p>Command line flags to pass to <code>cargo test</code> (or <code>cargo nextest run</code> if using nextest). <code>--locked</code> is used regardless.</p>                                                     | `string`  | `false`  | `--all-targets --all-features`                        |
+| `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                            | `number`  | `false`  | `15`                                                  |
+| `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                    | `string`  | `false`  | `.`                                                   |
+| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                   | `string`  | `false`  | `{}`                                                  |
 
 ### Usage
 
@@ -163,6 +172,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: stable
+
+      matrix-os:
+      # List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
+      #
+      # Type: string
+      # Required: false
+      # Default: ["ubuntu-latest", "macos-latest", "windows-latest"]
 
       nextest:
       # Use `cargo nextest` as the test runner, instead of `cargo test`. If true, doctests will be run as a separate step with `cargo test` as nextest does not yet support them
@@ -235,20 +251,21 @@ A simple but effective CI pipeline for python packages and projects
 <!-- action-docs-all source=".github/workflows/Python.yml" project="FollowTheProcess/ci/.github/workflows/Python.yml" version="v1" -->
 ### Inputs
 
-| name                     | description                                                                                                                                                                                          | type      | required | default                            |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------- |
-| `python-version`         | <p>The version of python to use as the project default, overrides <code>python-version-file</code>. Defaults to reading from <code>python-version-file</code>.</p>                                   | `string`  | `false`  | `""`                               |
-| `python-version-file`    | <p>File to use to detect default python version, can be a PEP621 compliant pyproject.toml, or a <code>.python-version</code> file. If <code>python-version</code> is specified, this is ignored.</p> | `string`  | `false`  | `pyproject.toml`                   |
-| `matrix-python-versions` | <p>List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. <code>'["3.12", "3.13"]'</code> etc.</p>                                                          | `string`  | `false`  | `["3.10", "3.11", "3.12", "3.13"]` |
-| `codecov`                | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                       | `boolean` | `false`  | `true`                             |
-| `uv-version`             | <p>The version of uv to install</p>                                                                                                                                                                  | `string`  | `false`  | `latest`                           |
-| `ruff-version`           | <p>The version of ruff to use for formatting and linting</p>                                                                                                                                         | `string`  | `false`  | `latest`                           |
-| `mypy`                   | <p>Use the mypy type checker for the type check step, it is expected to be a dev dependency and have config inside pyproject.toml</p>                                                                | `boolean` | `false`  | `true`                             |
-| `pyright`                | <p>Use the pyright type checker for the type check step, can be combined with mypy, it is expected to be a dev dependency and have config inside pyproject.toml</p>                                  | `boolean` | `false`  | `false`                            |
-| `pytest-flags`           | <p>Command line flags to pass to pytest e.g. <code>--cov</code>, <code>--cov-report</code> etc.</p>                                                                                                  | `string`  | `false`  | `""`                               |
-| `timeout-minutes`        | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                | `number`  | `false`  | `15`                               |
-| `working-directory`      | <p>The working directory to be in for the entire workflow</p>                                                                                                                                        | `string`  | `false`  | `.`                                |
-| `env`                    | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                       | `string`  | `false`  | `{}`                               |
+| name                     | description                                                                                                                                                                                          | type      | required | default                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------- |
+| `python-version`         | <p>The version of python to use as the project default, overrides <code>python-version-file</code>. Defaults to reading from <code>python-version-file</code>.</p>                                   | `string`  | `false`  | `""`                                                  |
+| `python-version-file`    | <p>File to use to detect default python version, can be a PEP621 compliant pyproject.toml, or a <code>.python-version</code> file. If <code>python-version</code> is specified, this is ignored.</p> | `string`  | `false`  | `pyproject.toml`                                      |
+| `matrix-python-versions` | <p>List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. <code>'["3.12", "3.13"]'</code> etc.</p>                                                          | `string`  | `false`  | `["3.10", "3.11", "3.12", "3.13"]`                    |
+| `matrix-os`              | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p>                                                        | `string`  | `false`  | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
+| `codecov`                | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                       | `boolean` | `false`  | `true`                                                |
+| `uv-version`             | <p>The version of uv to install</p>                                                                                                                                                                  | `string`  | `false`  | `latest`                                              |
+| `ruff-version`           | <p>The version of ruff to use for formatting and linting</p>                                                                                                                                         | `string`  | `false`  | `latest`                                              |
+| `mypy`                   | <p>Use the mypy type checker for the type check step, it is expected to be a dev dependency and have config inside pyproject.toml</p>                                                                | `boolean` | `false`  | `true`                                                |
+| `pyright`                | <p>Use the pyright type checker for the type check step, can be combined with mypy, it is expected to be a dev dependency and have config inside pyproject.toml</p>                                  | `boolean` | `false`  | `false`                                               |
+| `pytest-flags`           | <p>Command line flags to pass to pytest e.g. <code>--cov</code>, <code>--cov-report</code> etc.</p>                                                                                                  | `string`  | `false`  | `""`                                                  |
+| `timeout-minutes`        | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                | `number`  | `false`  | `15`                                                  |
+| `working-directory`      | <p>The working directory to be in for the entire workflow</p>                                                                                                                                        | `string`  | `false`  | `.`                                                   |
+| `env`                    | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                       | `string`  | `false`  | `{}`                                                  |
 
 ### Usage
 
@@ -277,6 +294,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: ["3.10", "3.11", "3.12", "3.13"]
+
+      matrix-os:
+      # List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
+      #
+      # Type: string
+      # Required: false
+      # Default: ["ubuntu-latest", "macos-latest", "windows-latest"]
 
       codecov:
       # Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
@@ -360,13 +384,14 @@ Zig doesn't have much in the way of linting etc. at the moment, but this is a si
 <!-- action-docs-all source=".github/workflows/Zig.yml" project="FollowTheProcess/ci/.github/workflows/Zig.yml" version="v1" -->
 ### Inputs
 
-| name                | description                                                                                                                                                                                  | type     | required | default  |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | -------- |
-| `zig-version`       | <p>The zig version to install, can be a stable version e.g. "0.13.0", a specific nightly e.g. "0.14.0-dev.2+0884a4341", "master" for latest nightly build, or "latest" for latest stable</p> | `string` | `false`  | `latest` |
-| `build-flags`       | <p>User flags to pass to <code>zig build</code> e.g. "-Dmy-flag=value"</p>                                                                                                                   | `string` | `false`  | `""`     |
-| `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                        | `number` | `false`  | `15`     |
-| `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                | `string` | `false`  | `.`      |
-| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                               | `string` | `false`  | `{}`     |
+| name                | description                                                                                                                                                                                  | type     | required | default                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------- |
+| `zig-version`       | <p>The zig version to install, can be a stable version e.g. "0.13.0", a specific nightly e.g. "0.14.0-dev.2+0884a4341", "master" for latest nightly build, or "latest" for latest stable</p> | `string` | `false`  | `latest`                                              |
+| `matrix-os`         | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p>                                                | `string` | `false`  | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
+| `build-flags`       | <p>User flags to pass to <code>zig build</code> e.g. "-Dmy-flag=value"</p>                                                                                                                   | `string` | `false`  | `""`                                                  |
+| `timeout-minutes`   | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                        | `number` | `false`  | `15`                                                  |
+| `working-directory` | <p>The working directory to be in for the entire workflow</p>                                                                                                                                | `string` | `false`  | `.`                                                   |
+| `env`               | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                               | `string` | `false`  | `{}`                                                  |
 
 ### Usage
 
@@ -381,6 +406,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: latest
+
+      matrix-os:
+      # List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
+      #
+      # Type: string
+      # Required: false
+      # Default: ["ubuntu-latest", "macos-latest", "windows-latest"]
 
       build-flags:
       # User flags to pass to `zig build` e.g. "-Dmy-flag=value"
