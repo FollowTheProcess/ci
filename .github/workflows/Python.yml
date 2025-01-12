@@ -22,6 +22,12 @@ on:
         required: false
         default: '["3.10", "3.11", "3.12", "3.13"]'
 
+      matrix-os:
+        description: List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
+        type: string
+        required: false
+        default: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+
       codecov:
         description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
         type: boolean
@@ -92,10 +98,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        os: ${{ fromJSON(inputs.matrix-os) }}
         python-version: ${{ fromJSON(inputs.matrix-python-versions) }}
 
     steps:
