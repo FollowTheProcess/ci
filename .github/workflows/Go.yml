@@ -70,7 +70,7 @@ on:
 permissions:
   contents: read
 
-env: ${{ fromJSON(inputs.env) }}
+# env: ${{ fromJSON(inputs.env) }}
 
 jobs:
   test:
@@ -224,8 +224,16 @@ jobs:
       - name: Set Fuzz Matrix
         id: set-matrix
         run: |
-          echo "empty=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))' | jq '. | length == 0')" >> $GITHUB_OUTPUT
-          echo "matrix=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "empty=$(go test ./... -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))' | jq '. | length == 0')" >> $GITHUB_OUTPUT
+          echo "matrix=$(go test ./... -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+
+      - name: Log Fuzz Outputs
+        if: steps.set-matrix.outputs.empty == 'true'
+        run: echo ::notice title=Fuzz Tests::Nothing to fuzz 😴
+
+      - name: Log Fuzz Outputs
+        if: steps.set-matrix.outputs.empty != 'true'
+        run: echo ::notice title=Fuzz Tests::${{ toJSON(steps.set-matrix.outputs.matrix) }}
 
   fuzz:
     name: Fuzz
