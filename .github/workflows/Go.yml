@@ -70,7 +70,7 @@ on:
 permissions:
   contents: read
 
-env: ${{ fromJSON(inputs.env) }}
+# env: ${{ fromJSON(inputs.env) }}
 
 jobs:
   test:
@@ -224,8 +224,33 @@ jobs:
       - name: Set Fuzz Matrix
         id: set-matrix
         run: |
-          echo "empty=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))' | jq '. | length == 0')" >> $GITHUB_OUTPUT
-          echo "matrix=$(go test -list ^Fuzz -run ^$ | grep '^Fuzz' | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          files=$(grep -r --include='**_test.go' --files-with-matches 'func Fuzz' .)
+
+          cmds=()
+
+          for file in ${files}; do
+              funcs=$(grep -o '^func Fuzz\w*' $file | sed 's/func //')
+              for func in ${funcs}; do
+                  pkg=$(dirname $file)
+                  cmds+=("go test $pkg -run="^${func}\$" -fuzz="^${func}\$"")
+              done
+          done
+
+          if [ ${#cmds[@]} -eq 0 ]; then
+              echo "empty=true" >> $GITHUB_OUTPUT
+              echo "matrix='[]'" >> $GITHUB_OUTPUT
+          else
+              echo empty=false >> $GITHUB_OUTPUT
+              echo matrix=$(jq -c -n '$ARGS.positional' --args "${cmds[@]}") >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log Fuzz Outputs
+        if: steps.set-matrix.outputs.empty == 'true'
+        run: echo ::notice::Nothing to fuzz 😴
+
+      - name: Log Fuzz Outputs
+        if: steps.set-matrix.outputs.empty != 'true'
+        run: echo ::notice::Will fuzz the following tests ${{ toJSON(steps.set-matrix.outputs.matrix) }}
 
   fuzz:
     name: Fuzz
@@ -242,7 +267,7 @@ jobs:
 
     strategy:
       matrix:
-        fuzz-target: ${{ fromJSON(needs.fuzz-matrix.outputs.matrix) }}
+        fuzz-cmd: ${{ fromJSON(needs.fuzz-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout Code
@@ -254,4 +279,4 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Fuzz Tests
-        run: go test -fuzz "^${{ matrix.fuzz-target }}$" -fuzztime ${{ inputs.fuzz-time }}
+        run: ${{ matrix.fuzz-cmd }} -fuzztime ${{ inputs.fuzz-time }}
