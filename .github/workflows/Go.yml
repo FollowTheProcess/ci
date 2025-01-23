@@ -224,7 +224,7 @@ jobs:
       - name: Set Fuzz Matrix
         id: set-matrix
         run: |
-          files=$(grep -r --include='**_test.go' --files-with-matches 'func Fuzz' .)
+          files=$(grep -r --include='**_test.go' --files-with-matches 'func Fuzz' . || true)
 
           cmds=()
 
