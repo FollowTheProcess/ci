@@ -219,6 +219,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: FollowTheProcess/ci
+          sparse-checkout: fuzz.py
+          sparse-checkout-cone-mode: false
           path: ci
 
       - name: Show Folder Structure
