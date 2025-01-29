@@ -232,7 +232,7 @@ jobs:
 
       - name: Fuzz Matrix
         id: fuzz-matrix
-        run: echo "json=$(python scripts/fuzz.py)" >> $GITHUB_OUTPUT
+        run: echo "json=$(python ci/scripts/fuzz.py)" >> $GITHUB_OUTPUT
 
       - name: Log Empty Fuzz Outputs
         if: steps.fuzz-matrix.outputs.json == '[]'
