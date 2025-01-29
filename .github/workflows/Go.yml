@@ -221,6 +221,7 @@ jobs:
           repository: FollowTheProcess/ci
           sparse-checkout: |
             scripts/fuzz.py
+          sparse-checkout-cone-mode: false
           ref: main
           path: ci
 
