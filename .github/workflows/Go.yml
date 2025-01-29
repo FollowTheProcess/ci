@@ -222,6 +222,7 @@ jobs:
           sparse-checkout: |
             scripts/fuzz.py
           sparse-checkout-cone-mode: false
+          path: ci
           ref: main
 
       - name: Set up Go
