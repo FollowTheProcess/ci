@@ -222,6 +222,7 @@ jobs:
           sparse-checkout: |
             scripts/fuzz.py
           ref: main
+          path: ci
 
       - name: Show Folder Structure
         run: |
