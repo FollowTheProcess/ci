@@ -209,53 +209,32 @@ jobs:
         shell: bash
 
     outputs:
-      empty: ${{ steps.set-matrix.outputs.empty }}
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      json: ${{ steps.fuzz-matrix.outputs.json }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Fetch Fuzz Script
+        run: wget https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - name: Set Fuzz Matrix
-        id: set-matrix
-        run: |
-          files=$(grep -r --include='**_test.go' --files-with-matches 'func Fuzz' . || true)
+      - name: Fuzz Matrix
+        id: fuzz-matrix
+        run: echo "json=$(python fuzz.py)" >> $GITHUB_OUTPUT
 
-          cmds=()
-
-          for file in ${files}; do
-              funcs=$(grep -o '^func Fuzz\w*' $file | sed 's/func //')
-              for func in ${funcs}; do
-                  pkg=$(dirname $file)
-                  cmds+=("go test $pkg -run="^${func}\$" -fuzz="^${func}\$"")
-              done
-          done
-
-          if [ ${#cmds[@]} -eq 0 ]; then
-              echo "empty=true" >> $GITHUB_OUTPUT
-              echo "matrix='[]'" >> $GITHUB_OUTPUT
-          else
-              echo empty=false >> $GITHUB_OUTPUT
-              echo matrix=$(jq -c -n '$ARGS.positional' --args "${cmds[@]}") >> $GITHUB_OUTPUT
-          fi
-
-      - name: Log Fuzz Outputs
-        if: steps.set-matrix.outputs.empty == 'true'
+      - name: Log Empty Fuzz Outputs
+        if: steps.fuzz-matrix.outputs.json == '[]'
         run: echo ::notice::Nothing to fuzz 😴
 
-      - name: Log Fuzz Outputs
-        if: steps.set-matrix.outputs.empty != 'true'
-        run: echo ::notice::Will fuzz the following tests ${{ toJSON(steps.set-matrix.outputs.matrix) }}
-
   fuzz:
-    name: Fuzz
+    name: Fuzz (${{ matrix.pkg }}/${{ matrix.name }})
     runs-on: ubuntu-latest
-    if: ${{ inputs.fuzz == true && needs.fuzz-matrix.outputs.empty != 'true' }}
+    if: ${{ inputs.fuzz == true && needs.fuzz-matrix.outputs.json != '[]' }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
@@ -267,7 +246,7 @@ jobs:
 
     strategy:
       matrix:
-        fuzz-cmd: ${{ fromJSON(needs.fuzz-matrix.outputs.matrix) }}
+        include: ${{ fromJSON(needs.fuzz-matrix.outputs.json) }}
 
     steps:
       - name: Checkout Code
@@ -279,4 +258,4 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Fuzz Tests
-        run: ${{ matrix.fuzz-cmd }} -fuzztime ${{ inputs.fuzz-time }}
+        run: go test ${{ matrix.pkg }} -run=^${{ matrix.name }}$ -fuzz=^${{ matrix.name }}$ -fuzztime ${{ inputs.fuzz-time }}
