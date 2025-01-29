@@ -225,6 +225,9 @@ jobs:
           path: ci
           ref: main
 
+      - name: Show Folder Structure
+        run: ls -R
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
