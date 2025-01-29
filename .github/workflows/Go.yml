@@ -226,7 +226,8 @@ jobs:
           ref: main
 
       - name: Show Folder Structure
-        run: ls -R
+        run: |
+          ls -lR
 
       - name: Set up Go
         uses: actions/setup-go@v5
