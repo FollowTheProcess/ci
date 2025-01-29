@@ -215,13 +215,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Checkout Fuzz Script
-        uses: actions/checkout@v4
-        with:
-          repository: FollowTheProcess/ci
-          sparse-checkout: fuzz.py
-          sparse-checkout-cone-mode: false
-          path: ci
+      - name: Fetch Fuzz Script
+        run: wget https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/fix/fuzz-script/fuzz.py
 
       - name: Show Folder Structure
         run: |
@@ -234,7 +229,7 @@ jobs:
 
       - name: Fuzz Matrix
         id: fuzz-matrix
-        run: echo "json=$(python ci/fuzz.py)" >> $GITHUB_OUTPUT
+        run: echo "json=$(python fuzz.py)" >> $GITHUB_OUTPUT
 
       - name: Log Empty Fuzz Outputs
         if: steps.fuzz-matrix.outputs.json == '[]'
