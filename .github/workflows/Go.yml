@@ -216,11 +216,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch Fuzz Script
-        run: wget https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/fix/fuzz-script/fuzz.py
-
-      - name: Show Folder Structure
-        run: |
-          ls -lR
+        run: wget https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -236,7 +232,7 @@ jobs:
         run: echo ::notice::Nothing to fuzz 😴
 
   fuzz:
-    name: Fuzz ${{ matrix.pkg }}/${{ matrix.name }}
+    name: Fuzz (${{ matrix.pkg }}/${{ matrix.name }})
     runs-on: ubuntu-latest
     if: ${{ inputs.fuzz == true && needs.fuzz-matrix.outputs.json != '[]' }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
