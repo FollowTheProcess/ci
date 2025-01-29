@@ -228,6 +228,7 @@ jobs:
       - name: Show Folder Structure
         run: |
           ls -lR
+          ls -lR ci
 
       - name: Set up Go
         uses: actions/setup-go@v5
