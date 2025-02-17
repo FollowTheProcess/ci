@@ -204,4 +204,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check for Typos
-        uses: crate-ci/typos@v1.29.5
+        uses: crate-ci/typos@v1.29.7
