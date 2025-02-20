@@ -45,6 +45,27 @@ permissions:
 env: ${{ fromJSON(inputs.env) }}
 
 jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: ${{ inputs.zig-version }}
+
+      - name: Format Zig Source
+        run: zig fmt . --color on --check --ast-check
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
@@ -67,7 +88,7 @@ jobs:
           version: ${{ inputs.zig-version }}
 
       - name: Run Tests
-        run: zig build test --summary all ${{ inputs.build-flags }}
+        run: zig build test --summary all ${{ inputs.build-flags }} --color on
 
   typos:
     name: Typos

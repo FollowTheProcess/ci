@@ -68,7 +68,14 @@ class Test:
     @staticmethod
     def parse(raw: str) -> Test:
         """
-        Parse a Test from a line of JSONL.
+        Parses a Test from a line of JSONL as output from `go test -list -json`.
+
+        Args:
+            raw (str): Raw line of JSON
+
+        Returns:
+            Test: The parsed Test
+
         """
         record: dict[str, str] = json.loads(raw)
         return Test(
@@ -81,10 +88,14 @@ class Test:
 
 def list_tests() -> list[str]:
     """
-    Runs go list ./... with flags to return information about
-    Go packages that contain Fuzz tests.
+    Runs go list ./... with flags to return information about Go packages
+    that contain Fuzz tests.
 
     It returns a list of JSON lines.
+
+    Returns:
+        list[str]: The JSON lines, one per package.
+
     """
     output = subprocess.run(
         [
@@ -107,7 +118,15 @@ def list_tests() -> list[str]:
 
 def parse_lines(lines: list[str]) -> Iterator[Test]:
     """
-    Takes a list of JSON lines and parses them into our Test record.
+    Takes a list of JSON lines representing go package info
+    and parses each one, emitting a sequence of `Test` structures.
+
+    Args:
+        lines (list[str]): The list of JSON lines
+
+    Yields:
+        Iterator[Test]: Iterator of parsed `Test` objects
+
     """
     for line in lines:
         yield Test.parse(line)
@@ -117,6 +136,13 @@ def fuzz_filter(tests: Iterator[Test]) -> Iterator[Test]:
     """
     Filters an incoming stream of Test for those containing an output
     of FuzzXXX.
+
+    Args:
+        tests (Iterator[Test]): The incoming Test structures.
+
+    Yields:
+        Iterator[Test]: Those Tests containing an output that starts with Fuzz
+
     """
     for test in tests:
         if test.output.startswith("Fuzz"):
@@ -127,6 +153,13 @@ def collect(tests: Iterator[Test]) -> list[dict[str, str]]:
     """
     Collect a stream of Tests into the final output expected as a GitHub
     actions matrix.
+
+    Args:
+        tests (Iterator[Test]): The incoming tests
+
+    Returns:
+        list[dict[str, str]]: Final output suitable for passing to GitHub actions matrix
+
     """
     return [{"name": test.output, "pkg": test.package} for test in tests]
 
