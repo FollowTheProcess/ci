@@ -232,7 +232,7 @@ jobs:
         run: echo ::notice::Nothing to fuzz 😴
 
   fuzz:
-    name: Fuzz (${{ matrix.pkg }}/${{ matrix.name }})
+    name: Fuzz
     runs-on: ubuntu-latest
     if: ${{ inputs.fuzz == true && needs.fuzz-matrix.outputs.json != '[]' }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
