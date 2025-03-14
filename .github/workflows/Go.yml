@@ -32,10 +32,16 @@ on:
         default: true
 
       fuzz-time:
-        description: Time (in Go `time.Duration` format) to run each fuzz test for
+        description: Time (in Go `time.Duration` format) to run each fuzz test for e.g 1m30s
         type: string
         required: false
         default: 1m
+
+      fuzz-fail-fast:
+        description: Cancel running fuzz tests if one fails, defaults to false.
+        type: boolean
+        required: false
+        default: false
 
       codecov:
         description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
@@ -245,6 +251,7 @@ jobs:
       - fuzz-matrix
 
     strategy:
+      fail-fast: ${{ inputs.fuzz-fail-fast }}
       matrix:
         include: ${{ fromJSON(needs.fuzz-matrix.outputs.json) }}
 
