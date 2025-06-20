@@ -1,0 +1,126 @@
+name: Terraform CI
+
+on:
+  workflow_call:
+    inputs:
+      terraform-version:
+        description: The version of Terraform to install and run
+        type: string
+        required: false
+        default: latest
+
+      tflint-version:
+        description: The version of TFLint to install and run
+        type: string
+        required: false
+        default: latest
+
+      tflint-minimum-failure-severity:
+        description: The minimum finding severity that TFLint should fail for. Must be one of `error`, `warning` or `notice`.
+        type: string
+        required: false
+        default: warning
+
+      timeout-minutes:
+        description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+        type: number
+        required: false
+        default: 5
+
+      working-directory:
+        description: The working directory to be in for the entire workflow
+        type: string
+        required: false
+        default: "."
+
+permissions:
+  contents: read
+  
+env:
+  # https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_in_automation
+  TF_IN_AUTOMATION: true
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform-version }}
+          terraform_wrapper: true
+
+      - name: Initialise Terraform
+        run: terraform init -backend=false
+
+      - name: Validate
+        run: terraform validate
+
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform-version }}
+          terraform_wrapper: true
+
+      - name: Initialise Terraform
+        run: terraform init -backend=false
+
+      - name: Format
+        run: terraform fmt -recursive -check
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform-version }}
+          terraform_wrapper: true
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: ${{ inputs.tflint-version }}
+          github_token: ${{ github.token }} # https://github.com/terraform-linters/setup-tflint#github_token
+
+      - name: Initialise Terraform
+        run: terraform init -backend=false
+
+      - name: Initialise TFLint
+        run: tflint --init
+
+      - name: Lint
+        run: tflint --recursive --color --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }}
