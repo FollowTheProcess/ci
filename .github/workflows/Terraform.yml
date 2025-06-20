@@ -21,13 +21,19 @@ on:
         required: false
         default: warning
 
+      tflint-config-file:
+        description: The path (relative to `cwd`) of the TFLint config file.
+        type: string
+        required: false
+        default: .tflint.hcl
+
       timeout-minutes:
         description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
         type: number
         required: false
         default: 5
 
-      working-directory:
+      cwd:
         description: The working directory to be in for the entire workflow
         type: string
         required: false
@@ -39,6 +45,7 @@ permissions:
 env:
   # https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_in_automation
   TF_IN_AUTOMATION: true
+  TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
   validate:
@@ -47,7 +54,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.working-directory }}
+        working-directory: ${{ inputs.cwd }}
         shell: bash
 
     steps:
@@ -59,6 +66,17 @@ jobs:
         with:
           terraform_version: ${{ inputs.terraform-version }}
           terraform_wrapper: true
+
+      - name: Create Terraform Cache
+        run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
 
       - name: Initialise Terraform
         run: terraform init -backend=false
@@ -72,7 +90,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.working-directory }}
+        working-directory: ${{ inputs.cwd }}
         shell: bash
 
     steps:
@@ -84,6 +102,17 @@ jobs:
         with:
           terraform_version: ${{ inputs.terraform-version }}
           terraform_wrapper: true
+
+      - name: Create Terraform Cache
+        run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
 
       - name: Initialise Terraform
         run: terraform init -backend=false
@@ -97,7 +126,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.working-directory }}
+        working-directory: ${{ inputs.cwd }}
         shell: bash
 
     steps:
@@ -116,6 +145,17 @@ jobs:
           tflint_version: ${{ inputs.tflint-version }}
           github_token: ${{ github.token }} # https://github.com/terraform-linters/setup-tflint#github_token
 
+      - name: Create Terraform Cache
+        run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+
       - name: Initialise Terraform
         run: terraform init -backend=false
 
@@ -123,4 +163,9 @@ jobs:
         run: tflint --init
 
       - name: Lint
-        run: tflint --recursive --color --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }}
+        run: |
+          tflint \
+            --recursive \
+            --color \
+            --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }} \
+            --config=${{ inputs.tflint-config-file }}
