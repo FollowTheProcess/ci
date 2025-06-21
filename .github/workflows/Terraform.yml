@@ -22,10 +22,10 @@ on:
         default: warning
 
       tflint-config-file:
-        description: The path (relative to `cwd`) of the TFLint config file.
+        description: The path (relative to `cwd`) of a TFLint config file. Defaults to .tflint.hcl.
         type: string
         required: false
-        default: .tflint.hcl
+        default: ""
 
       timeout-minutes:
         description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
@@ -163,9 +163,18 @@ jobs:
         run: tflint --init
 
       - name: Lint
+        if: inputs.tflint-config-file != ''
         run: |
           tflint \
             --recursive \
             --color \
             --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }} \
             --config=${{ inputs.tflint-config-file }}
+
+      - name: Lint
+        if: inputs.tflint-config-file == ''
+        run: |
+          tflint \
+            --recursive \
+            --color \
+            --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }}
