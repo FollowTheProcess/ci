@@ -27,6 +27,12 @@ on:
         required: false
         default: ""
 
+      checkov-config-file:
+        description: The path (relative to `cwd`) of a Checkov config file. Defaults to .checkov.yaml
+        type: string
+        required: false
+        default: .checkov.yaml
+
       timeout-minutes:
         description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
         type: number
@@ -178,3 +184,23 @@ jobs:
             --recursive \
             --color \
             --minimum-failure-severity=${{ inputs.tflint-minimum-failure-severity }}
+
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.cwd }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Checkov Scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          config_file: ${{ inputs.checkov-config-file }}
+          output_format: cli
+          output_file_path: console

@@ -156,14 +156,15 @@ Simple Terraform CI workflow:
 <!-- action-docs-all source=".github/workflows/Terraform.yml" project="FollowTheProcess/ci/.github/workflows/Terraform.yml" version="v3" -->
 ### Inputs
 
-| name                              | description                                                                                                                                      | type     | required | default   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | --------- |
-| `terraform-version`               | <p>The version of Terraform to install and run</p>                                                                                               | `string` | `false`  | `latest`  |
-| `tflint-version`                  | <p>The version of TFLint to install and run</p>                                                                                                  | `string` | `false`  | `latest`  |
-| `tflint-minimum-failure-severity` | <p>The minimum finding severity that TFLint should fail for. Must be one of <code>error</code>, <code>warning</code> or <code>notice</code>.</p> | `string` | `false`  | `warning` |
-| `tflint-config-file`              | <p>The path (relative to <code>cwd</code>) of a TFLint config file. Defaults to .tflint.hcl.</p>                                                 | `string` | `false`  | `""`      |
-| `timeout-minutes`                 | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                            | `number` | `false`  | `5`       |
-| `cwd`                             | <p>The working directory to be in for the entire workflow</p>                                                                                    | `string` | `false`  | `.`       |
+| name                              | description                                                                                                                                      | type     | required | default         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- | --------------- |
+| `terraform-version`               | <p>The version of Terraform to install and run</p>                                                                                               | `string` | `false`  | `latest`        |
+| `tflint-version`                  | <p>The version of TFLint to install and run</p>                                                                                                  | `string` | `false`  | `latest`        |
+| `tflint-minimum-failure-severity` | <p>The minimum finding severity that TFLint should fail for. Must be one of <code>error</code>, <code>warning</code> or <code>notice</code>.</p> | `string` | `false`  | `warning`       |
+| `tflint-config-file`              | <p>The path (relative to <code>cwd</code>) of a TFLint config file. Defaults to .tflint.hcl.</p>                                                 | `string` | `false`  | `""`            |
+| `checkov-config-file`             | <p>The path (relative to <code>cwd</code>) of a Checkov config file. Defaults to .checkov.yaml</p>                                               | `string` | `false`  | `.checkov.yaml` |
+| `timeout-minutes`                 | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                            | `number` | `false`  | `5`             |
+| `cwd`                             | <p>The working directory to be in for the entire workflow</p>                                                                                    | `string` | `false`  | `.`             |
 
 ### Usage
 
@@ -199,6 +200,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: ""
+
+      checkov-config-file:
+      # The path (relative to `cwd`) of a Checkov config file. Defaults to .checkov.yaml
+      #
+      # Type: string
+      # Required: false
+      # Default: .checkov.yaml
 
       timeout-minutes:
       # Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
