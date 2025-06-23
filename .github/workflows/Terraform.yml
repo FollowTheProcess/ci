@@ -201,6 +201,7 @@ jobs:
       - name: Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
+          directory: ${{ inputs.cwd }}
           config_file: ${{ inputs.checkov-config-file }}
           output_format: cli
           output_file_path: console
