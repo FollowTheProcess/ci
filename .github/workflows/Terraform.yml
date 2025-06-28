@@ -47,7 +47,7 @@ on:
 
 permissions:
   contents: read
-  
+
 env:
   # https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_in_automation
   TF_IN_AUTOMATION: true
@@ -167,6 +167,8 @@ jobs:
 
       - name: Initialise TFLint
         run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
 
       - name: Lint
         if: inputs.tflint-config-file != ''
