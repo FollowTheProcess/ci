@@ -33,6 +33,7 @@ A great drop in CI pipeline for Go projects!
 - Uses [tparse] to output a nice test summary to `$GITHUB_STEP_SUMMARY` (with an option to disable)
 - Optionally upload coverage reports to [CodeCov.io] (with tokenless upload)
 - Linting with [golangci-lint] via the [golangci-lint-action], driven from your local `.golangci-lint.yml` config
+- You may also choose [staticcheck] as your lint tool, again driven from your local `staticcheck.conf` config
 - Check for typos with [typos-cli]
 - Vulnerability analysis with [govulncheck]
 - Automatically discover and run fuzz tests in a matrix with a configurable fuzz time
@@ -577,3 +578,4 @@ jobs:
 [pyright]: https://microsoft.github.io/pyright/#/
 [pytest]: https://docs.pytest.org/en/stable/
 [tflint]: https://github.com/terraform-linters/tflint
+[staticcheck]: https://staticcheck.dev
