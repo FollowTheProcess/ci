@@ -49,10 +49,11 @@ A great drop in CI pipeline for Go projects!
 | `matrix-os`             | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p>                                                                                                                                                                                         | `string`  | `false`  | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
 | `fuzz`                  | <p>Automatically generate a matrix of fuzz tests and run them in parallel for a configurable <code>fuzz-time</code>. If there are no fuzz tests in the project, this is a no op so is a safe option to leave on.</p>                                                                                                                  | `boolean` | `false`  | `true`                                                |
 | `fuzz-time`             | <p>Time (in Go <code>time.Duration</code> format) to run each fuzz test for e.g 1m30s</p>                                                                                                                                                                                                                                             | `string`  | `false`  | `1m`                                                  |
-| `fuzz-fail-fast`        | <p>Cancel running fuzz tests if one fails, defaults to false.</p>                                                                                                                                                                                                                                                                     | `boolean` | `false`  | `false`                                               |
 | `codecov`               | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p>                                                                                                                                                                                                                        | `boolean` | `false`  | `true`                                                |
-| `golangci-lint-version` | <p>The version of golangci-lint to use</p>                                                                                                                                                                                                                                                                                            | `string`  | `false`  | `latest`                                              |
-| `timeout-minutes`       | <p>Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.</p>                                                                                                                                                                                                                                 | `number`  | `false`  | `15`                                                  |
+| `lint-tool`             | <p>The tool to use to lint Go source. Either <code>staticcheck</code> or <code>golangci-lint</code>.</p>                                                                                                                                                                                                                              | `string`  | `false`  | `golangci-lint`                                       |
+| `golangci-lint-version` | <p>The version of golangci-lint to use, if selected with <code>lint-tool</code></p>                                                                                                                                                                                                                                                   | `string`  | `false`  | `latest`                                              |
+| `staticcheck-version`   | <p>The version of staticcheck to use, if selected with <code>lint-tool</code></p>                                                                                                                                                                                                                                                     | `string`  | `false`  | `latest`                                              |
+| `timeout-minutes`       | <p>Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.</p>                                                                                                                                                                                                                                  | `number`  | `false`  | `15`                                                  |
 | `working-directory`     | <p>The working directory to be in for the entire workflow</p>                                                                                                                                                                                                                                                                         | `string`  | `false`  | `.`                                                   |
 | `env`                   | <p>JSON string of an object containing environment variables to set for the whole workflow</p>                                                                                                                                                                                                                                        | `string`  | `false`  | `{}`                                                  |
 
@@ -98,13 +99,6 @@ jobs:
       # Required: false
       # Default: 1m
 
-      fuzz-fail-fast:
-      # Cancel running fuzz tests if one fails, defaults to false.
-      #
-      # Type: boolean
-      # Required: false
-      # Default: false
-
       codecov:
       # Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
       #
@@ -112,15 +106,29 @@ jobs:
       # Required: false
       # Default: true
 
+      lint-tool:
+      # The tool to use to lint Go source. Either `staticcheck` or `golangci-lint`.
+      #
+      # Type: string
+      # Required: false
+      # Default: golangci-lint
+
       golangci-lint-version:
-      # The version of golangci-lint to use
+      # The version of golangci-lint to use, if selected with `lint-tool`
+      #
+      # Type: string
+      # Required: false
+      # Default: latest
+
+      staticcheck-version:
+      # The version of staticcheck to use, if selected with `lint-tool`
       #
       # Type: string
       # Required: false
       # Default: latest
 
       timeout-minutes:
-      # Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+      # Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.
       #
       # Type: number
       # Required: false
