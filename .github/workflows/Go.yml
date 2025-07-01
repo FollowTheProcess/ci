@@ -37,26 +37,32 @@ on:
         required: false
         default: 1m
 
-      fuzz-fail-fast:
-        description: Cancel running fuzz tests if one fails, defaults to false.
-        type: boolean
-        required: false
-        default: false
-
       codecov:
         description: Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.
         type: boolean
         required: false
         default: true
 
+      lint-tool:
+        description: The tool to use to lint Go source. Either `staticcheck` or `golangci-lint`.
+        type: string
+        required: false
+        default: golangci-lint
+
       golangci-lint-version:
-        description: The version of golangci-lint to use
+        description: The version of golangci-lint to use, if selected with `lint-tool`
+        type: string
+        required: false
+        default: latest
+
+      staticcheck-version:
+        description: The version of staticcheck to use, if selected with `lint-tool`
         type: string
         required: false
         default: latest
 
       timeout-minutes:
-        description: Maximum number of minutes to let each step execute for, will be cancelled when timeout is met.
+        description: Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.
         type: number
         required: false
         default: 15
@@ -159,10 +165,18 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run Linting
+      - name: Run Linting (golangci-lint)
+        if: inputs.lint-tool == 'golanci-lint'
         uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ inputs.golangci-lint-version }}
+
+      - name: Run Linting (staticcheck)
+        if: inputs.lint-tool == 'staticcheck'
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: ${{ inputs.staticcheck-version }}
+          install-go: false
 
   typos:
     name: Typos
@@ -256,7 +270,7 @@ jobs:
       - fuzz-matrix
 
     strategy:
-      fail-fast: ${{ inputs.fuzz-fail-fast }}
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.fuzz-matrix.outputs.json) }}
 
