@@ -43,20 +43,20 @@ on:
         required: false
         default: true
 
-      lint-tool:
+      linter:
         description: The tool to use to lint Go source. Either `staticcheck` or `golangci-lint`.
         type: string
         required: false
         default: golangci-lint
 
       golangci-lint-version:
-        description: The version of golangci-lint to use, if selected with `lint-tool`
+        description: The version of golangci-lint to use, if selected with `linter`
         type: string
         required: false
         default: latest
 
       staticcheck-version:
-        description: The version of staticcheck to use, if selected with `lint-tool`
+        description: The version of staticcheck to use, if selected with `linter`
         type: string
         required: false
         default: latest
@@ -166,13 +166,13 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Linting (golangci-lint)
-        if: inputs.lint-tool == 'golanci-lint'
+        if: inputs.linter == 'golanci-lint'
         uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ inputs.golangci-lint-version }}
 
       - name: Run Linting (staticcheck)
-        if: inputs.lint-tool == 'staticcheck'
+        if: inputs.linter == 'staticcheck'
         uses: dominikh/staticcheck-action@v1
         with:
           version: ${{ inputs.staticcheck-version }}
