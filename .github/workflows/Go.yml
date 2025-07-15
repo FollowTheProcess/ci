@@ -166,7 +166,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Linting (golangci-lint)
-        if: inputs.linter == 'golanci-lint'
+        if: inputs.linter == 'golangci-lint'
         uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ inputs.golangci-lint-version }}
@@ -211,7 +211,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-        
+
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
 
