@@ -37,10 +37,12 @@ Where there is a previous job that runs this script and redirects the output to 
 ```yaml
 - name: Make Fuzz Matrix
   id: matrix
-  run: echo "matrix=$(python script.py)" >> $GITHUB_OUTPUT
+  run: echo "json=$(python script.py)" >> $GITHUB_OUTPUT
 ```
 
 If there are no fuzz tests, the script simply prints '[]'.
+
+See the workflow Go.yml for how this script is used.
 """
 
 from __future__ import annotations

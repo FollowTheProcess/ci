@@ -157,6 +157,10 @@ jobs:
         shell: bash
 
     steps:
+      - name: Check Linter Input
+        if: ${{ inputs.linter != 'golangci-lint' && inputs.linter != 'staticcheck' }}
+        run: echo "::error::Valid linters are 'golangci-lint' or 'staticcheck', got '${{ inputs.linter }}'" && exit 1
+
       - name: Checkout Code
         uses: actions/checkout@v5
 
@@ -237,11 +241,11 @@ jobs:
 
       - name: Fetch Fuzz Script
         run: |
-          curl -L \
-            -H "Accept: application/vnd.github.raw" \
-            -H "Authorization: Bearer ${{ github.token }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -O https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
+          curl --location \
+            --header "Accept: application/vnd.github.raw" \
+            --header "Authorization: Bearer ${{ github.token }}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --remote-name https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
 
       - name: Set up Go
         uses: actions/setup-go@v5
