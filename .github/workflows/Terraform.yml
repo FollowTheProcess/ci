@@ -146,7 +146,7 @@ jobs:
           terraform_wrapper: true
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v5
+        uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: ${{ inputs.tflint-version }}
           github_token: ${{ github.token }} # https://github.com/terraform-linters/setup-tflint#github_token
