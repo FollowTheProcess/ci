@@ -112,12 +112,18 @@ jobs:
 
       - name: Run Tests
         if: inputs.test-summary == true
+        env:
+          # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
+          CGO_ENABLED: 1
         run: |
           go test -race -json -cover -covermode=atomic ${{ inputs.test-flags }} ./... | tparse -trimpath -all -format markdown -follow-output ./raw.txt >> $GITHUB_STEP_SUMMARY
           cat ./raw.txt
 
       - name: Run Tests
         if: inputs.test-summary != true
+        env:
+          # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
+          CGO_ENABLED: 1
         run: go test -race -cover -covermode=atomic ${{ inputs.test-flags }} ./...
 
   cov:
@@ -140,6 +146,9 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Tests
+        env:
+          # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
+          CGO_ENABLED: 1
         run: go test -race -cover -covermode=atomic -coverprofile=./coverage.out ./...
 
       - name: Coverage
