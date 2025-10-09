@@ -129,7 +129,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('./tests/**/*.tftest.hcl') != '' }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
