@@ -126,6 +126,43 @@ jobs:
       - name: Format
         run: terraform fmt -recursive -check
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('./tests/**/*.tftest.hcl') != '' }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.cwd }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform-version }}
+          terraform_wrapper: true
+
+      - name: Create Terraform Cache
+        run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+
+      - name: Initialise Terraform
+        run: terraform init -backend=false
+
+      - name: Test
+        run: terraform test
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
