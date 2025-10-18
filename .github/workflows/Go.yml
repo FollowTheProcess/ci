@@ -61,6 +61,12 @@ on:
         required: false
         default: latest
 
+      vulncheck:
+        description: Use golang.org/x/vuln/cmd/govulncheck to scan for vulnerabilities
+        type: boolean
+        required: false
+        default: true
+
       timeout-minutes:
         description: Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.
         type: number
@@ -210,6 +216,7 @@ jobs:
   vulncheck:
     name: Vulncheck
     runs-on: ubuntu-latest
+    if: inputs.vulncheck == true
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
