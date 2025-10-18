@@ -54,6 +54,7 @@ A great drop in CI pipeline for Go projects!
 | `linter` | <p>The tool to use to lint Go source. Either <code>staticcheck</code> or <code>golangci-lint</code>.</p> | `string` | `false` | `golangci-lint` |
 | `golangci-lint-version` | <p>The version of golangci-lint to use, if selected with <code>linter</code></p> | `string` | `false` | `latest` |
 | `staticcheck-version` | <p>The version of staticcheck to use, if selected with <code>linter</code></p> | `string` | `false` | `latest` |
+| `vulncheck` | <p>Use golang.org/x/vuln/cmd/govulncheck to scan for vulnerabilities</p> | `boolean` | `false` | `true` |
 | `timeout-minutes` | <p>Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.</p> | `number` | `false` | `15` |
 | `working-directory` | <p>The working directory to be in for the entire workflow</p> | `string` | `false` | `.` |
 | `env` | <p>JSON string of an object containing environment variables to set for the whole workflow</p> | `string` | `false` | `{}` |
@@ -128,6 +129,13 @@ jobs:
       # Type: string
       # Required: false
       # Default: latest
+
+      vulncheck:
+      # Use golang.org/x/vuln/cmd/govulncheck to scan for vulnerabilities
+      #
+      # Type: boolean
+      # Required: false
+      # Default: true
 
       timeout-minutes:
       # Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.
