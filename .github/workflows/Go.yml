@@ -268,7 +268,7 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Fuzz Matrix
+      - name: Generate Fuzz Matrix
         id: fuzz-matrix
         run: echo "json=$(python fuzz.py)" >> $GITHUB_OUTPUT
 
@@ -304,4 +304,35 @@ jobs:
           go-version-file: go.mod
 
       - name: Run Fuzz Tests
+        id: fuzz
+        continue-on-error: true
         run: go test ${{ matrix.pkg }} -run=^${{ matrix.name }}$ -fuzz=^${{ matrix.name }}$ -fuzztime ${{ inputs.fuzz-time }}
+
+      - name: Check Fuzz Fail Cases
+        uses: tj-actions/verify-changed-files@v20
+        id: check-new-fuzz-files
+        with:
+          files: |
+            **/testdata/fuzz/**
+
+      - name: Log Fuzz Fail Cases
+        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
+        run: |
+          echo "::warning::Fuzz tests found new failing inputs"
+
+      - name: Upload Fuzz Fail Cases
+        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
+        id: upload
+        uses: actions/upload-artifact@v5
+        with:
+          name: fuzz-artifacts
+          path: "**/testdata/fuzz/**"
+          overwrite: true
+
+      - name: Log Download URL
+        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
+        run: echo "::notice::Download artifacts ${{ steps.upload.artifact-url }}"
+
+      - name: Fail Run
+        if: steps.fuzz.outcome == 'failure'
+        run: echo "::error::Fuzz tests failed" && exit 1
