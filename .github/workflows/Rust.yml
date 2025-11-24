@@ -58,7 +58,7 @@ on:
         type: string
         required: false
         default: "{}"
-  
+
 permissions:
   contents: read
 
