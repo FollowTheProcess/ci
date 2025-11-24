@@ -331,7 +331,7 @@ jobs:
 
       - name: Log Download URL
         if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
-        run: echo "::notice::Download artifacts ${{ steps.upload.artifact-url }}"
+        run: echo "::notice::Download artifacts ${{ steps.upload.outputs.artifact-url }}"
 
       - name: Fail Run
         if: steps.fuzz.outcome == 'failure'
