@@ -265,7 +265,7 @@ Rust CI can get complex, but this is a great simple CI flow for most crates
 | --- | --- | --- | --- | --- |
 | `toolchain` | <p>The rust toolchain to install e.g "stable", "nightly" etc. any rustup toolchain expression is supported, see https://rust-lang.github.io/rustup/concepts/toolchains.html</p> | `string` | `false` | `stable` |
 | `matrix-os` | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p> | `string` | `false` | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
-| `nextest` | <p>Use <code>cargo nextest</code> as the test runner, instead of <code>cargo test</code>. If true, doctests will be run as a separate step with <code>cargo test</code> as nextest does not yet support them</p> | `boolean` | `false` | `false` |
+| `nextest` | <p>Use <code>cargo nextest</code> as the test runner, instead of <code>cargo test</code></p> | `boolean` | `false` | `false` |
 | `nextest-profile` | <p>Name of the nextest profile to use for <code>cargo nextest</code>. Only has any effect if using nextest as the test runner</p> | `string` | `false` | `default` |
 | `rustflags` | <p>Value of the <code>RUSTFLAGS</code> env var</p> | `string` | `false` | `--deny warnings` |
 | `test-flags` | <p>Command line flags to pass to <code>cargo test</code> (or <code>cargo nextest run</code> if using nextest). <code>--locked</code> is used regardless.</p> | `string` | `false` | `--all-targets --all-features` |
@@ -296,7 +296,7 @@ jobs:
       # Default: ["ubuntu-latest", "macos-latest", "windows-latest"]
 
       nextest:
-      # Use `cargo nextest` as the test runner, instead of `cargo test`. If true, doctests will be run as a separate step with `cargo test` as nextest does not yet support them
+      # Use `cargo nextest` as the test runner, instead of `cargo test`
       #
       # Type: boolean
       # Required: false

@@ -18,7 +18,7 @@ on:
 
       nextest:
         description: >
-          Use `cargo nextest` as the test runner, instead of `cargo test`. If true, doctests will be run as a separate step with `cargo test` as nextest does not yet support them
+          Use `cargo nextest` as the test runner, instead of `cargo test`
         type: boolean
         required: false
         default: false
@@ -71,6 +71,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     env:
       RUSTFLAGS: ${{ inputs.rustflags }}
+      CARGO_TERM_COLOR: always
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -91,7 +92,7 @@ jobs:
           key: ${{ inputs.toolchain }}
 
       - name: Cargo Check
-        run: cargo check --locked --all-targets --all-features --color always
+        run: cargo check --locked --all-targets --all-features
 
   test:
     name: Test
@@ -99,6 +100,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     env:
       RUSTFLAGS: ${{ inputs.rustflags }}
+      CARGO_TERM_COLOR: always
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -121,42 +123,19 @@ jobs:
         with:
           key: ${{ inputs.toolchain }}
 
+      - name: Set up Cargo Nextest
+        if: inputs.nextest == true
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+
       - name: Test
         if: inputs.nextest != true
-        run: cargo test --locked ${{ inputs.test-flags }} --color always
+        run: cargo test --locked ${{ inputs.test-flags }}
 
       - name: Test
         if: inputs.nextest == true
-        run: cargo nextest run --locked ${{ inputs.test-flags }} --profile ${{ inputs.nextest-profile }} --color always
-
-  doctest:
-    name: Doc Tests
-    runs-on: ubuntu-latest
-    if: inputs.nextest == true
-    timeout-minutes: ${{ inputs.timeout-minutes }}
-    env:
-      RUSTFLAGS: ${{ inputs.rustflags }}
-    defaults:
-      run:
-        working-directory: ${{ inputs.working-directory }}
-        shell: bash
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-
-      - name: Set up Rust
-        run: |
-          rustup update --no-self-update ${{ inputs.toolchain }}
-          rustup default ${{ inputs.toolchain }}
-
-      - name: Cache Dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ inputs.toolchain }}
-
-      - name: Test
-        run: cargo test --locked --doc ${{ inputs.test-flags }} --color always
+        run: cargo nextest run --locked ${{ inputs.test-flags }} --profile ${{ inputs.nextest-profile }}
 
   lint:
     name: Lint
@@ -164,6 +143,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     env:
       RUSTFLAGS: ${{ inputs.rustflags }}
+      CARGO_TERM_COLOR: always
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -188,7 +168,7 @@ jobs:
         run: cargo fmt --all --check
 
       - name: Cargo Clippy
-        run: cargo clippy --locked --all-targets --all-features --color always
+        run: cargo clippy --locked --all-targets --all-features
 
   typos:
     name: Typos
