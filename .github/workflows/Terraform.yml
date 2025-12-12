@@ -77,7 +77,7 @@ jobs:
         run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Cache Terraform
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
@@ -113,7 +113,7 @@ jobs:
         run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Cache Terraform
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
@@ -149,7 +149,7 @@ jobs:
         run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Cache Terraform
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
@@ -191,7 +191,7 @@ jobs:
         run: mkdir --parents ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Cache Terraform
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
