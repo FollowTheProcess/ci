@@ -158,7 +158,7 @@ jobs:
         run: go test -race -cover -covermode=atomic -coverprofile=./coverage.out ./...
 
       - name: Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage.out
 

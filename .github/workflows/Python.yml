@@ -184,7 +184,7 @@ jobs:
         run: uv run pytest --cov --cov-report xml --color yes --doctest-modules
 
       - name: Upload Coverage to CodeCov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage.xml
 
