@@ -52,8 +52,8 @@ on:
         required: false
         default: true
 
-      pyright:
-        description: Use the pyright type checker for the type check step, can be combined with mypy, it is expected to be a dev dependency and have config inside pyproject.toml
+      ty:
+        description: Use the ty type checker for the type check step, can be combined with mypy, it is expected to be a dev dependency and have config inside pyproject.toml
         type: boolean
         required: false
         default: false
@@ -141,6 +141,7 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           args: format --check
+          version: ${{ inputs.ruff-version }}
 
       - name: Ruff Lint
         run: ruff check --output-format github
@@ -149,6 +150,8 @@ jobs:
     name: CodeCov
     runs-on: ubuntu-latest
     if: inputs.codecov == true
+    needs:
+      - test
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
@@ -186,11 +189,12 @@ jobs:
       - name: Upload Coverage to CodeCov
         uses: codecov/codecov-action@v6
         with:
-          files: ./coverage.xml
+          files: ${{ inputs.working-directory }}/coverage.xml
 
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
+    if: inputs.mypy == true || inputs.ty == true
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
@@ -226,9 +230,9 @@ jobs:
         if: inputs.mypy == true
         run: uv run mypy --pretty --color-output --config-file pyproject.toml
 
-      - name: Type Check (Pyright)
-        if: inputs.pyright == true
-        run: uv run pyright
+      - name: Type Check (ty)
+        if: inputs.ty == true
+        run: uv run ty check
 
   typos:
     name: Typos

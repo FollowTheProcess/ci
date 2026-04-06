@@ -22,13 +22,13 @@ on:
         default: warning
 
       tflint-config-file:
-        description: The path (relative to `cwd`) of a TFLint config file. Defaults to .tflint.hcl.
+        description: The path (relative to `working-directory`) of a TFLint config file. Defaults to .tflint.hcl.
         type: string
         required: false
         default: ""
 
       checkov-config-file:
-        description: The path (relative to `cwd`) of a Checkov config file. Defaults to .checkov.yaml
+        description: The path (relative to `working-directory`) of a Checkov config file. Defaults to .checkov.yaml
         type: string
         required: false
         default: .checkov.yaml
@@ -39,7 +39,7 @@ on:
         required: false
         default: 5
 
-      cwd:
+      working-directory:
         description: The working directory to be in for the entire workflow
         type: string
         required: false
@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.cwd }}
+        working-directory: ${{ inputs.working-directory }}
         shell: bash
 
     steps:
@@ -96,7 +96,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.cwd }}
+        working-directory: ${{ inputs.working-directory }}
         shell: bash
 
     steps:
@@ -132,7 +132,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.cwd }}
+        working-directory: ${{ inputs.working-directory }}
         shell: bash
 
     steps:
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.cwd }}
+        working-directory: ${{ inputs.working-directory }}
         shell: bash
 
     steps:
@@ -229,7 +229,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
-        working-directory: ${{ inputs.cwd }}
+        working-directory: ${{ inputs.working-directory }}
         shell: bash
 
     steps:
@@ -239,7 +239,23 @@ jobs:
       - name: Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: ${{ inputs.cwd }}
+          directory: ${{ inputs.working-directory }}
           config_file: ${{ inputs.checkov-config-file }}
           output_format: cli
           output_file_path: console
+
+  typos:
+    name: Typos
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Check for Typos
+        uses: crate-ci/typos@v1
