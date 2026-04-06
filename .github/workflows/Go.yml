@@ -122,20 +122,32 @@ jobs:
           # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
           CGO_ENABLED: 1
         run: |
-          go test -race -json -cover -covermode=atomic ${{ inputs.test-flags }} ./... | tparse -trimpath -all -format markdown -follow-output ./raw.txt >> $GITHUB_STEP_SUMMARY
-          cat ./raw.txt
+          go test -race -json -cover -covermode=atomic -coverprofile=./coverage.out ${{ inputs.test-flags }} ./... > ./raw.txt || EXIT_CODE=$?
+          tparse -trimpath -all -format markdown -file ./raw.txt >> $GITHUB_STEP_SUMMARY || true
+          tparse -trimpath -all -file ./raw.txt || true
+          exit ${EXIT_CODE:-0}
 
       - name: Run Tests
         if: inputs.test-summary != true
         env:
           # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
           CGO_ENABLED: 1
-        run: go test -race -cover -covermode=atomic ${{ inputs.test-flags }} ./...
+        run: go test -race -cover -covermode=atomic -coverprofile=./coverage.out ${{ inputs.test-flags }} ./...
+
+      - name: Upload Coverage Profile
+        if: matrix.os == 'ubuntu-latest' && inputs.codecov == true
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-profile
+          path: ${{ inputs.working-directory }}/coverage.out
+          overwrite: true
 
   cov:
     name: CodeCov
     runs-on: ubuntu-latest
     if: inputs.codecov == true
+    needs:
+      - test
     timeout-minutes: ${{ inputs.timeout-minutes }}
     defaults:
       run:
@@ -146,21 +158,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
+      - name: Download Coverage Profile
+        uses: actions/download-artifact@v8
         with:
-          go-version-file: go.mod
-
-      - name: Run Tests
-        env:
-          # -race needs CGO (https://go.dev/doc/articles/race_detector#Requirements)
-          CGO_ENABLED: 1
-        run: go test -race -cover -covermode=atomic -coverprofile=./coverage.out ./...
+          name: coverage-profile
+          path: ${{ inputs.working-directory }}
 
       - name: Coverage
         uses: codecov/codecov-action@v6
         with:
-          files: ./coverage.out
+          files: ${{ inputs.working-directory }}/coverage.out
 
   lint:
     name: Lint
@@ -320,12 +327,19 @@ jobs:
         run: |
           echo "::warning::Fuzz tests found new failing inputs"
 
+      - name: Compute Artifact Name
+        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
+        id: artifact-name
+        run: |
+          safe_pkg=$(echo "${{ matrix.pkg }}" | tr '/:.' '-')
+          echo "value=fuzz-artifacts-${safe_pkg}-${{ matrix.name }}" >> $GITHUB_OUTPUT
+
       - name: Upload Fuzz Fail Cases
         if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
         id: upload
         uses: actions/upload-artifact@v7
         with:
-          name: fuzz-artifacts
+          name: ${{ steps.artifact-name.outputs.value }}
           path: "**/testdata/fuzz/**"
           overwrite: true
 
