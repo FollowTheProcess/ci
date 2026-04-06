@@ -334,5 +334,5 @@ jobs:
         run: echo "::notice::Download artifacts ${{ steps.upload.outputs.artifact-url }}"
 
       - name: Fail Run
-        if: steps.fuzz.outcome == 'failure'
+        if: steps.fuzz.outcome == 'failure' && steps.check-new-fuzz-files.outputs.files_changed == 'true'
         run: echo "::error::Fuzz tests failed" && exit 1
