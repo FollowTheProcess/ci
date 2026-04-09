@@ -343,10 +343,8 @@ jobs:
           path: "**/testdata/fuzz/**"
           overwrite: true
 
-      - name: Log Download URL
-        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
-        run: echo "::notice::Download artifacts ${{ steps.upload.outputs.artifact-url }}"
-
       - name: Fail Run
         if: steps.fuzz.outcome == 'failure' && steps.check-new-fuzz-files.outputs.files_changed == 'true'
-        run: echo "::error::Fuzz tests failed" && exit 1
+        run: |
+          echo "::error::Fuzz test failed: ${{ matrix.name }} | gh run download ${{ github.run_id }} --repo ${{ github.repository }} -n ${{ steps.artifact-name.outputs.value }}"
+          exit 1
