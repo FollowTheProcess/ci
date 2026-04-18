@@ -318,11 +318,14 @@ jobs:
         run: go test ${{ matrix.pkg }} -run=^${{ matrix.name }}$ -fuzz=^${{ matrix.name }}$ -fuzztime ${{ inputs.fuzz-time }}
 
       - name: Check Fuzz Fail Cases
-        uses: tj-actions/verify-changed-files@v20
         id: check-new-fuzz-files
-        with:
-          files: |
-            **/testdata/fuzz/**
+        run: |
+          changed=$(git ls-files --others --exclude-standard | grep 'testdata/fuzz/' || true)
+          if [[ -n "$changed" ]]; then
+            echo "files_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "files_changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Log Fuzz Fail Cases
         if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
