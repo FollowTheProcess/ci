@@ -264,11 +264,11 @@ jobs:
 
       - name: Fetch Fuzz Script
         run: |
-          curl --location \
+          curl --fail --location \
             --header "Accept: application/vnd.github.raw" \
             --header "Authorization: Bearer ${{ github.token }}" \
             --header "X-GitHub-Api-Version: 2022-11-28" \
-            --remote-name https://raw.githubusercontent.com/FollowTheProcess/ci/${{ github.ref }}/fuzz.py
+            --remote-name https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -277,7 +277,9 @@ jobs:
 
       - name: Generate Fuzz Matrix
         id: fuzz-matrix
-        run: echo "json=$(python fuzz.py)" >> $GITHUB_OUTPUT
+        run: |
+          json=$(python fuzz.py)
+          echo "json=${json}" >> $GITHUB_OUTPUT
 
       - name: Log Empty Fuzz Outputs
         if: steps.fuzz-matrix.outputs.json == '[]'
@@ -299,7 +301,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(needs.fuzz-matrix.outputs.json) }}
+        include: ${{ fromJSON(needs.fuzz-matrix.outputs.json || '[]') }}
 
     steps:
       - name: Checkout Code
