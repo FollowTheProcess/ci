@@ -323,6 +323,11 @@ jobs:
           changed=$(git ls-files --others --exclude-standard | grep 'testdata/fuzz/' || true)
           if [[ -n "$changed" ]]; then
             echo "files_changed=true" >> $GITHUB_OUTPUT
+            {
+              echo "paths<<EOF"
+              echo "$changed"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
           else
             echo "files_changed=false" >> $GITHUB_OUTPUT
           fi
@@ -345,7 +350,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact-name.outputs.value }}
-          path: "**/testdata/fuzz/**"
+          path: ${{ steps.check-new-fuzz-files.outputs.paths }}
           overwrite: true
 
       - name: Fail Run
