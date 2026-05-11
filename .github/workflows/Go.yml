@@ -267,7 +267,7 @@ jobs:
           curl --fail --location \
             --header "Accept: application/vnd.github.raw" \
             --header "Authorization: Bearer ${{ github.token }}" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --header "X-GitHub-Api-Version: 2026-03-10" \
             --remote-name https://raw.githubusercontent.com/FollowTheProcess/ci/refs/heads/main/fuzz.py
 
       - name: Set up Go
@@ -355,6 +355,6 @@ jobs:
 
       - name: Fail Run
         if: steps.fuzz.outcome == 'failure' && steps.check-new-fuzz-files.outputs.files_changed == 'true'
-        run: |
+        run: |-
           echo "::error::Fuzz test failed: ${{ matrix.name }} | gh run download ${{ github.run_id }} --repo ${{ github.repository }} -n ${{ steps.artifact-name.outputs.value }}"
           exit 1

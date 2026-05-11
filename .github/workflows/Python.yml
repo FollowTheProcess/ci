@@ -17,10 +17,12 @@ on:
         default: pyproject.toml
 
       matrix-python-versions:
-        description: List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc.
+        description: >
+          List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc. Defaults to
+          the currently supported versions.
         type: string
         required: false
-        default: '["3.10", "3.11", "3.12", "3.13"]'
+        default: '["3.10", "3.11", "3.12", "3.13", "3.14"]'
 
       matrix-os:
         description: List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
@@ -127,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout-minutes }}
     env:
-      FORCE_COLOR: true # Make ruff output colour even in CI
+      FORCE_COLOR: true  # Make ruff output colour even in CI
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -232,7 +234,7 @@ jobs:
 
       - name: Type Check (ty)
         if: inputs.ty == true
-        run: uv run ty check
+        run: uv run ty check . --color always --output-format github
 
   typos:
     name: Typos
