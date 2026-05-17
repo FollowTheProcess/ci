@@ -88,8 +88,6 @@ jobs:
 
       - name: Cache Dependencies
         uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ inputs.toolchain }}
 
       - name: Cargo Check
         run: cargo check --locked --all-targets --all-features
@@ -120,8 +118,6 @@ jobs:
 
       - name: Cache Dependencies
         uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ inputs.toolchain }}
 
       - name: Set up Cargo Nextest
         if: inputs.nextest == true
@@ -161,8 +157,6 @@ jobs:
 
       - name: Cache Dependencies
         uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ inputs.toolchain }}
 
       - name: Check Formatting
         run: cargo fmt --all --check
