@@ -344,6 +344,16 @@ jobs:
           safe_pkg=$(echo "${{ matrix.pkg }}" | tr '/:.' '-')
           echo "value=fuzz-artifacts-${safe_pkg}-${{ matrix.name }}" >> $GITHUB_OUTPUT
 
+      - name: Compute Fuzz Output Directory
+        if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
+        id: fuzz-output-dir
+        run: |
+          # actions/upload-artifact strips the common parent of all matched paths,
+          # so the artifact only contains the bare fuzz input file. Pass this
+          # directory to `gh run download --dir` so the file lands where Go expects it.
+          first=$(echo "${{ steps.check-new-fuzz-files.outputs.paths }}" | head -n 1)
+          echo "value=$(dirname "$first")" >> $GITHUB_OUTPUT
+
       - name: Upload Fuzz Fail Cases
         if: steps.check-new-fuzz-files.outputs.files_changed == 'true'
         id: upload
@@ -356,5 +366,5 @@ jobs:
       - name: Fail Run
         if: steps.fuzz.outcome == 'failure' && steps.check-new-fuzz-files.outputs.files_changed == 'true'
         run: |-
-          echo "::error::Fuzz test failed: ${{ matrix.name }} | gh run download ${{ github.run_id }} --repo ${{ github.repository }} -n ${{ steps.artifact-name.outputs.value }}"
+          echo "::error::Fuzz test failed: ${{ matrix.name }} | gh run download ${{ github.run_id }} --repo ${{ github.repository }} -n ${{ steps.artifact-name.outputs.value }} --dir ${{ steps.fuzz-output-dir.outputs.value }}"
           exit 1
