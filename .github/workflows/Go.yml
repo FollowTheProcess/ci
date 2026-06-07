@@ -165,7 +165,7 @@ jobs:
           path: ${{ inputs.working-directory }}
 
       - name: Coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ${{ inputs.working-directory }}/coverage.out
 
