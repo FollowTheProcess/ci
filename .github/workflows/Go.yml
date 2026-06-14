@@ -43,20 +43,8 @@ on:
         required: false
         default: true
 
-      linter:
-        description: The tool to use to lint Go source. Either `staticcheck` or `golangci-lint`.
-        type: string
-        required: false
-        default: golangci-lint
-
       golangci-lint-version:
         description: The version of golangci-lint to use, if selected with `linter`
-        type: string
-        required: false
-        default: latest
-
-      staticcheck-version:
-        description: The version of staticcheck to use, if selected with `linter`
         type: string
         required: false
         default: latest
@@ -179,10 +167,6 @@ jobs:
         shell: bash
 
     steps:
-      - name: Check Linter Input
-        if: ${{ inputs.linter != 'golangci-lint' && inputs.linter != 'staticcheck' }}
-        run: echo "::error::Valid linters are 'golangci-lint' or 'staticcheck', got '${{ inputs.linter }}'" && exit 1
-
       - name: Checkout Code
         uses: actions/checkout@v6
 
@@ -191,18 +175,10 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run Linting (golangci-lint)
-        if: inputs.linter == 'golangci-lint'
+      - name: Run Linting
         uses: golangci/golangci-lint-action@v9
         with:
           version: ${{ inputs.golangci-lint-version }}
-
-      - name: Run Linting (staticcheck)
-        if: inputs.linter == 'staticcheck'
-        uses: dominikh/staticcheck-action@v1
-        with:
-          version: ${{ inputs.staticcheck-version }}
-          install-go: false
 
   typos:
     name: Typos
@@ -246,7 +222,7 @@ jobs:
         run: govulncheck ./...
 
   fuzz-matrix:
-    name: Check for Fuzz Tests
+    name: Discover Fuzz Tests
     runs-on: ubuntu-latest
     if: inputs.fuzz == true
     timeout-minutes: ${{ inputs.timeout-minutes }}

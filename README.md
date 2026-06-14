@@ -52,9 +52,7 @@ A great drop in CI pipeline for Go projects!
 | `fuzz` | <p>Automatically generate a matrix of fuzz tests and run them in parallel for a configurable <code>fuzz-time</code>. If there are no fuzz tests in the project, this is a no op so is a safe option to leave on.</p> | `boolean` | `false` | `true` |
 | `fuzz-time` | <p>Time (in Go <code>time.Duration</code> format) to run each fuzz test for e.g 1m30s</p> | `string` | `false` | `1m` |
 | `codecov` | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p> | `boolean` | `false` | `true` |
-| `linter` | <p>The tool to use to lint Go source. Either <code>staticcheck</code> or <code>golangci-lint</code>.</p> | `string` | `false` | `golangci-lint` |
 | `golangci-lint-version` | <p>The version of golangci-lint to use, if selected with <code>linter</code></p> | `string` | `false` | `latest` |
-| `staticcheck-version` | <p>The version of staticcheck to use, if selected with <code>linter</code></p> | `string` | `false` | `latest` |
 | `vulncheck` | <p>Use golang.org/x/vuln/cmd/govulncheck to scan for vulnerabilities</p> | `boolean` | `false` | `true` |
 | `timeout-minutes` | <p>Maximum number of minutes to let each job execute for, will be cancelled when timeout is met.</p> | `number` | `false` | `15` |
 | `working-directory` | <p>The working directory to be in for the entire workflow</p> | `string` | `false` | `.` |
@@ -110,22 +108,8 @@ jobs:
       # Required: false
       # Default: true
 
-      linter:
-      # The tool to use to lint Go source. Either `staticcheck` or `golangci-lint`.
-      #
-      # Type: string
-      # Required: false
-      # Default: golangci-lint
-
       golangci-lint-version:
       # The version of golangci-lint to use, if selected with `linter`
-      #
-      # Type: string
-      # Required: false
-      # Default: latest
-
-      staticcheck-version:
-      # The version of staticcheck to use, if selected with `linter`
       #
       # Type: string
       # Required: false
@@ -371,7 +355,7 @@ A simple but effective CI pipeline for python packages and projects
 | --- | --- | --- | --- | --- |
 | `python-version` | <p>The version of python to use as the project default, overrides <code>python-version-file</code>. Defaults to reading from <code>python-version-file</code>.</p> | `string` | `false` | `""` |
 | `python-version-file` | <p>File to use to detect default python version, can be a PEP621 compliant pyproject.toml, or a <code>.python-version</code> file. If <code>python-version</code> is specified, this is ignored.</p> | `string` | `false` | `pyproject.toml` |
-| `matrix-python-versions` | <p>List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. <code>'["3.12", "3.13"]'</code> etc.</p> | `string` | `false` | `["3.10", "3.11", "3.12", "3.13"]` |
+| `matrix-python-versions` | <p>List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. <code>'["3.12", "3.13"]'</code> etc. Defaults to the currently supported versions.</p> | `string` | `false` | `["3.10", "3.11", "3.12", "3.13", "3.14"]` |
 | `matrix-os` | <p>List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. <code>'["ubuntu-latest", "windows-latest"]'</code> etc.</p> | `string` | `false` | `["ubuntu-latest", "macos-latest", "windows-latest"]` |
 | `codecov` | <p>Send coverage data to CodeCov.io. Requires that tokenless uploading has been configured and is enabled.</p> | `boolean` | `false` | `true` |
 | `uv-version` | <p>The version of uv to install</p> | `string` | `false` | `latest` |
@@ -406,11 +390,11 @@ jobs:
       # Default: pyproject.toml
 
       matrix-python-versions:
-      # List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc.
+      # List of python versions to test against in the matrix. Must be in pseudo-JSON array syntax e.g. `'["3.12", "3.13"]'` etc. Defaults to the currently supported versions.
       #
       # Type: string
       # Required: false
-      # Default: ["3.10", "3.11", "3.12", "3.13"]
+      # Default: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
       matrix-os:
       # List of operating systems to test on. Must be in pseudo-JSON array syntax e.g. `'["ubuntu-latest", "windows-latest"]'` etc.
