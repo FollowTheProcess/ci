@@ -140,7 +140,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Ruff Format
-        uses: astral-sh/ruff-action@v4.0.0
+        uses: astral-sh/ruff-action@v4.1.0
         with:
           args: format --check
           version: ${{ inputs.ruff-version }}
