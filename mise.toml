@@ -1,0 +1,14 @@
+[tools]
+"npm:action-docs" = "latest"
+
+[tasks.check]
+description = "Check the actions"
+run = ["typos", "actionlint -ignore SC2086"]
+
+[tasks.docs]
+description = "Use the action-docs to update the README"
+run = [
+  '''
+  for file in .github/workflows/*.yml; do action-docs --update-readme --toc-level 3 --no-banner --source "$file"; done
+  ''',
+]
