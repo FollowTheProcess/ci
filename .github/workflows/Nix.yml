@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: action/checkout@v7
+        uses: actions/checkout@v7
 
       - name: Set up Nix
         uses: cachix/install-nix-action@v31
